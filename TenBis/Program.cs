@@ -11,9 +11,9 @@ internal class Program
     private static void aggregate10BisMoneyToPoints()
     {
         TenBisWebsite tenBisWebsite = null;
-
         try
         {
+            //Tima get Json file and throw the chrome path inside that json file
             tenBisWebsite = new TenBisWebsite();
             tenBisWebsite.StartTenBisWebsite();
             tenBisWebsite.ValidateUserLoggedIn();

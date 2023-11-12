@@ -6,15 +6,18 @@ namespace TenBis.Classes
 {
     internal class TenBisWebsite
     {
-        ChromeDriverService _chromeDriverService;
-        ChromeOptions _chromeOptions;
-        ChromeDriver _chromeDriver;
-        ReadOnlyCollection<IWebElement> _dropDownImage;
+        private ChromeDriverService _chromeDriverService;
+        private ChromeOptions _chromeOptions;
+        private ChromeDriver _chromeDriver;
+        private ReadOnlyCollection<IWebElement> _dropDownImage;
+        private int _amountOfTries;
+
         public TenBisWebsite()
         {
+            _amountOfTries = 0;
             _chromeDriverService = ChromeDriverService.CreateDefaultService();
             _chromeOptions = new ChromeOptions();
-            _chromeOptions.AddArgument(@"--user-data-dir=C:\Users\User\AppData\Local\Google\Chrome\User Data\Default");
+            _chromeOptions.AddArgument(@"--user-data-dir=C:\Users\TimaK\AppData\Local\Google\Chrome\User Data\Default");
             _chromeDriver = new ChromeDriver(_chromeDriverService, _chromeOptions);
         }
 
@@ -46,22 +49,42 @@ namespace TenBis.Classes
             if (_dropDownImage.Count == 0)
             {
                 Task.Delay(28000);
-                ValidateUserLoggedIn();
+                RetryUserLoggedInValidation();
             }
+        }
+
+        private void RetryUserLoggedInValidation()
+        {
+            if (_amountOfTries == 3)
+            {
+                throw new Exception();
+            }
+
+            ValidateUserLoggedIn();
+            _amountOfTries++;
         }
 
         internal void AggregateMoneyToPoints()
         {
             Task.Delay(1000).Wait();
-            const string DROP_DOWN_IMAGE = @"//button[@class=""Button-sc-1n9hyby-0 AddToCredit__AddCreditButton-sc-1ux4vzy-3 fQLuJl kipuFE""]";
-            ReadOnlyCollection<IWebElement> aggregateButton = _chromeDriver.FindElements(By.XPath(DROP_DOWN_IMAGE));
+            const string LOAD_CARD_BUTTON = @"//button[@class=""Button-sc-1n9hyby-0 AddToCredit__AddCreditButton-sc-1ux4vzy-3 fQLuJl kipuFE""]";
+            ReadOnlyCollection<IWebElement> aggregateButton = _chromeDriver.FindElements(By.XPath(LOAD_CARD_BUTTON));
             if (!aggregateButton[0].Enabled)
             {
                 return;
             }
 
             aggregateButton[0].Click();
-           //Continue code here
+
+            const string CONTINIUE_BUTTON = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
+            ReadOnlyCollection<IWebElement> continiueButton = _chromeDriver.FindElements(By.XPath(CONTINIUE_BUTTON));
+            if (!continiueButton[0].Enabled)
+            {
+                return;
+            }
+
+            continiueButton[0].Click();
+            //Continue code here
         }
     }
 }
