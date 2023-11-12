@@ -84,7 +84,13 @@ namespace TenBis.Classes
             }
 
             continiueButton[0].Click();
-            //Continue code here
+            
+            const string CHARGE_CARD_BUTTON = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
+            ReadOnlyCollection<IWebElement> chargeCardButton = _chromeDriver.FindElements(By.XPath(CHARGE_CARD_BUTTON));
+            if (!chargeCardButton[0].Enabled)
+            {
+                return;
+            }
         }
     }
 }
