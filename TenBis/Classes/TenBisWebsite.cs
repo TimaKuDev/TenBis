@@ -91,6 +91,8 @@ namespace TenBis.Classes
             {
                 return;
             }
+
+            chargeCardButton[0].Click();
         }
     }
 }
