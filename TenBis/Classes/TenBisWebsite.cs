@@ -76,6 +76,7 @@ namespace TenBis.Classes
 
             aggregateButton[0].Click();
 
+            Task.Delay(1000).Wait();
             const string CONTINIUE_BUTTON = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
             ReadOnlyCollection<IWebElement> continiueButton = _chromeDriver.FindElements(By.XPath(CONTINIUE_BUTTON));
             if (!continiueButton[0].Enabled)
@@ -84,7 +85,8 @@ namespace TenBis.Classes
             }
 
             continiueButton[0].Click();
-            
+
+            Task.Delay(1000).Wait();
             const string CHARGE_CARD_BUTTON = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
             ReadOnlyCollection<IWebElement> chargeCardButton = _chromeDriver.FindElements(By.XPath(CHARGE_CARD_BUTTON));
             if (!chargeCardButton[0].Enabled)
@@ -93,6 +95,7 @@ namespace TenBis.Classes
             }
 
             chargeCardButton[0].Click();
+            Task.Delay(1000).Wait();
         }
     }
 }
