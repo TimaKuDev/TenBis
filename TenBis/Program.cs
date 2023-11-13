@@ -10,14 +10,21 @@ internal class Program
 
     private static void aggregate10BisMoneyToPoints()
     {
+
+
         TenBisWebsite tenBisWebsite = null;
         try
         {
-            //Tima get Json file and throw the chrome path inside that json file
-            tenBisWebsite = new TenBisWebsite();
+            using StreamReader reader = new StreamReader("ChromeUserPath.txt");
+            string chromeUserPath = reader.ReadLine();
+            tenBisWebsite = new TenBisWebsite(chromeUserPath);
             tenBisWebsite.StartTenBisWebsite();
             tenBisWebsite.ValidateUserLoggedIn();
             tenBisWebsite.AggregateMoneyToPoints();
+        }
+        catch(Exception exception)
+        {
+
         }
         finally
         {

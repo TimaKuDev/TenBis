@@ -6,18 +6,18 @@ namespace TenBis.Classes
 {
     internal class TenBisWebsite
     {
-        private ChromeDriverService _chromeDriverService;
-        private ChromeOptions _chromeOptions;
-        private ChromeDriver _chromeDriver;
+        private readonly ChromeDriverService _chromeDriverService;
+        private readonly ChromeOptions _chromeOptions;
+        private readonly ChromeDriver _chromeDriver;
         private ReadOnlyCollection<IWebElement> _dropDownImage;
         private int _amountOfTries;
 
-        public TenBisWebsite()
+        public TenBisWebsite(string? chromeUserPath)
         {
             _amountOfTries = 0;
             _chromeDriverService = ChromeDriverService.CreateDefaultService();
             _chromeOptions = new ChromeOptions();
-            _chromeOptions.AddArgument(@"--user-data-dir=C:\Users\TimaK\AppData\Local\Google\Chrome\User Data\Default");
+            _chromeOptions.AddArgument($"--user-data-dir={chromeUserPath}");
             _chromeDriver = new ChromeDriver(_chromeDriverService, _chromeOptions);
         }
 

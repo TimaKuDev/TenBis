@@ -14,4 +14,10 @@
     <PackageReference Include="Selenium.WebDriver.MSEdgeDriver" Version="118.0.2088.41" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ChromeUserPath.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
