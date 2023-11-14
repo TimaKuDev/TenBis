@@ -1,30 +1,30 @@
-﻿using TenBis.Classes;
+﻿using NLog;
+using TenBis.Classes;
 
 internal class Program
 {
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
     private static void Main(string[] args)
     {
-        aggregate10BisMoneyToPoints();
-        Environment.Exit(0);
+        int exitCode = aggregate10BisMoneyToPoints();
+        Environment.Exit(exitCode);
     }
 
-    private static void aggregate10BisMoneyToPoints()
+    private static int aggregate10BisMoneyToPoints()
     {
-
-
         TenBisWebsite tenBisWebsite = null;
         try
         {
-            using StreamReader reader = new StreamReader("ChromeUserPath.txt");
-            string chromeUserPath = reader.ReadLine();
-            tenBisWebsite = new TenBisWebsite(chromeUserPath);
+            tenBisWebsite = new TenBisWebsite(UserPath.GetChromePath());
             tenBisWebsite.StartTenBisWebsite();
             tenBisWebsite.ValidateUserLoggedIn();
             tenBisWebsite.AggregateMoneyToPoints();
+            return 0;
         }
         catch(Exception exception)
         {
-
+            _logger.Error(exception.Message);
+            return 1;
         }
         finally
         {
