@@ -38,7 +38,7 @@ internal class Program
         finally
         {
             browser?.Dispose();
-            INotifier notify = NotifierFactory.CreateNotifier(settingsModel.NotifyType, settingsModel.NotifyTo, currentBalanceAmount, isSuccessfullyAggregation: isSuccessfullyAggregation);
+            INotifier notify = NotifierFactory.CreateNotifier(settingsModel.NotifyType, settingsModel.NotifyTo, currentBalanceAmount, isSuccessfullyAggregation);
             notify?.Notify();
         }
     }
