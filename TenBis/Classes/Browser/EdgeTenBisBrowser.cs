@@ -35,7 +35,9 @@ namespace TenBis.Classes.Browser
         public void Dispose()
         {
             _edgeDriver?.Close();
+            Task.Delay(1000).Wait();
             _edgeDriver?.Quit();
+            Task.Delay(1000).Wait();
             _edgeDriver?.Dispose();
         }
 

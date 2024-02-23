@@ -1,7 +1,4 @@
-﻿using MailKit.Net.Smtp;
-using MimeKit;
-using MimeKit.Text;
-using NLog;
+﻿using NLog;
 using TenBis.Factories;
 using TenBis.Interfaces;
 using TenBis.SettingsFolder;
@@ -30,7 +27,7 @@ internal class Program
             browser?.ValidateUserLoggedIn();
             isSuccessfullyAggregation = browser?.TryAggregateMoneyToPoints();
             currentBalanceAmount = browser.GetCurrentPointsAmount();
-            
+
             return 0;
         }
         catch (Exception exception)

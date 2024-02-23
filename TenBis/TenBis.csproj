@@ -7,6 +7,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Enums\NewFolder\**" />
     <EmbeddedResource Remove="Enums\NewFolder\**" />
@@ -41,6 +49,12 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="GeneralUtils">
+      <HintPath>..\..\GeneralUtils\GeneralUtils\bin\Debug\net6.0\GeneralUtils.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using MailKit.Net.Smtp;
+﻿using GeneralUtils;
+using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
 using TenBis.Interfaces;
@@ -26,11 +27,11 @@ namespace TenBis.Classes.Notifiers
             }
 
             MimeMessage message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Ten Bis Notifier", "TenBisNotifier@gmail.com"));
+            message.From.Add(new MailboxAddress("Ten Bis Notifier", EmailInformation.Address));
             message.To.Add(MailboxAddress.Parse(_notifyTo));
             message.Subject = "Ten Bis";
-            string currentBalance = string.IsNullOrEmpty(_currentBalanceAmount) ? null : $"Your current balance is: {_currentBalanceAmount}";
-            string updateStatus = _isSuccessfullyAggregation.HasValue && _isSuccessfullyAggregation.Value ? "successfully updated" : "failed to update";
+            string? currentBalance = string.IsNullOrEmpty(_currentBalanceAmount) ? null : $"Your current balance is: {_currentBalanceAmount}";
+            string updateStatus = _isSuccessfullyAggregation == true ? "successfully updated" : "failed to update";
             message.Body = new TextPart(TextFormat.Text)
             {
                 Text = @$"10 Bis {updateStatus}
@@ -40,8 +41,8 @@ namespace TenBis.Classes.Notifiers
             SmtpClient client = new SmtpClient();
             try
             {
-                client.Connect("smtp.gmail.com", 465, true);
-                client.Authenticate("TenBisNotifier@gmail.com", "Need to input password here");
+                client.Connect(EmailInformation.Host, EmailInformation.Port, EmailInformation.UseSSL);
+                client.Authenticate(EmailInformation.Address, EmailInformation.Password);
                 client.Send(message);
             }
             catch (Exception exception)
