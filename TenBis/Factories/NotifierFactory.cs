@@ -1,17 +1,20 @@
 ﻿using TenBis.Classes.Notifiers;
 using TenBis.Enums;
 using TenBis.Interfaces;
+using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Factories
 {
     internal class NotifierFactory
     {
-        internal static INotifier CreateNotifier(NotifyType notifyType, string notifyTo, string? currentBalanceAmount, bool? isSuccessfullyAggregation)
+        internal static ICommunication CreateNotifier(NotifySettingsModel notifySettingsModel)
         {
-            switch (notifyType)
+            switch (notifySettingsModel.NotifyType)
             {
                 case NotifyType.Email:
-                    return new EmailNotifier(notifyTo, currentBalanceAmount, isSuccessfullyAggregation);
+                    return new EmailCommunication(notifySettingsModel.NotifyTo);
+                case NotifyType.Telegram:
+                    return new TelegramCommunication(notifySettingsModel.Token, notifySettingsModel.ChatId);
                 default:
                     return null;
             }

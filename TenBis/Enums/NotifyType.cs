@@ -3,6 +3,7 @@
     internal enum NotifyType
     {
         None,
-        Email
+        Email,
+        Telegram
     }
 }

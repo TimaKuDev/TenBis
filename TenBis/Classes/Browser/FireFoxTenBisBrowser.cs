@@ -1,8 +1,6 @@
 ﻿using NLog;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
-using System.Collections.ObjectModel;
 using TenBis.Interfaces;
 
 namespace TenBis.Classes.Browser
@@ -13,8 +11,6 @@ namespace TenBis.Classes.Browser
         private readonly FirefoxDriverService _firefoxDriverService;
         private readonly FirefoxOptions _firefoxOptions;
         private readonly FirefoxDriver _firefoxDriver;
-        private ReadOnlyCollection<IWebElement> _dropDownImage;
-        private int _amountOfTries;
 
         public FireFoxTenBisBrowser(string? userProfilePath)
         {
@@ -43,30 +39,30 @@ namespace TenBis.Classes.Browser
             _firefoxDriver?.Dispose();
         }
 
-        public bool TryAggregateMoneyToPoints()
+        public void AggregateMoneyToPoints()
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Initiating the process of money aggregation");
 
             _aggregateButton = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.LoadCardButtonElement));
             if (!TryClickingOnAggregateButton())
             {
-                return false;
+                return;
             }
 
             _continueButton = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.ContinueButtonElement));
             if (!TryClickingOnContinueButton())
             {
-                return false;
+                return;
             }
 
             _chargeCardButton = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.ChargeCardButtonElement));
             if (!TryClickingOnChargeButton())
             {
-                return false;
+                return;
             }
 
+            AggregatedSuccesfully = true;
             _logger.Info($"{Helper.GetCurrentMethod()}: The process of money aggregation has been successfully completed");
-            return true;
         }
 
         public void StartTenBisWebsite()
@@ -86,10 +82,10 @@ namespace TenBis.Classes.Browser
             base.ValidateUserLoggedIn();
         }
 
-        public string GetCurrentPointsAmount()
+        public string GetMessage()
         {
             _currentBalanceSpan = _firefoxDriver.FindElements(By.ClassName(TenBisWebsiteInfo.CurrentBalanceSpanElement));
-            return base.GetCurrentPointsAmount();
+            return base.GetMessage();
         }
     }
 }

@@ -4,7 +4,7 @@
     {
         public void StartTenBisWebsite();
         public void ValidateUserLoggedIn();
-        public bool TryAggregateMoneyToPoints();
-        string GetCurrentPointsAmount();
+        public void AggregateMoneyToPoints();
+        string? GetMessage();
     }
 }

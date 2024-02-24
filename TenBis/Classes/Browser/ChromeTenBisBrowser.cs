@@ -39,30 +39,30 @@ namespace TenBis.Classes.Browser
             _chromeDriver?.Dispose();
         }
 
-        public bool TryAggregateMoneyToPoints()
+        public void AggregateMoneyToPoints()
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Initiating the process of money aggregation");
 
             _aggregateButton = _chromeDriver.FindElements(By.XPath(TenBisWebsiteInfo.LoadCardButtonElement));
             if (!TryClickingOnAggregateButton())
             {
-                return false;
+                return;
             }
 
             _continueButton = _chromeDriver.FindElements(By.XPath(TenBisWebsiteInfo.ContinueButtonElement));
             if (!TryClickingOnContinueButton())
             {
-                return false;
+                return;
             }
 
             _chargeCardButton = _chromeDriver.FindElements(By.XPath(TenBisWebsiteInfo.ChargeCardButtonElement));
             if (!TryClickingOnChargeButton())
             {
-                return false;
+                return;
             }
 
+            AggregatedSuccesfully = true;
             _logger.Info($"{Helper.GetCurrentMethod()}: The process of money aggregation has been successfully completed");
-            return true;
         }
 
         public void StartTenBisWebsite()
@@ -82,10 +82,10 @@ namespace TenBis.Classes.Browser
             base.ValidateUserLoggedIn();
         }
 
-        public string GetCurrentPointsAmount()
+        public string GetMessage()
         {
             _currentBalanceSpan = _chromeDriver.FindElements(By.ClassName(TenBisWebsiteInfo.CurrentBalanceSpanElement));
-            return base.GetCurrentPointsAmount();
+            return base.GetMessage();
         }
     }
 }

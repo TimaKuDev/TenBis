@@ -1,7 +1,9 @@
 ﻿using NLog;
+using TenBis.Classes.Aggregation;
 using TenBis.Factories;
 using TenBis.Interfaces;
 using TenBis.SettingsFolder;
+using TenBis.SettingsFolder.Models;
 
 internal class Program
 {
@@ -9,26 +11,26 @@ internal class Program
     private static void Main(string[] args)
     {
         //Tima hide windowH
-        int exitCode = aggregate10BisMoneyToPoints();
+        int exitCode = RunScript();
         Environment.Exit(exitCode);
     }
 
-    private static int aggregate10BisMoneyToPoints()
+    private static int RunScript()
     {
-        string currentBalanceAmount = null;
-        bool? isSuccessfullyAggregation = false;
-        IBrowser browser = null;
-        SettingsModel settingsModel = null;
+        string? message = null;
+        ICommunication communcation = null;
         try
         {
-            settingsModel = Settings.GetSettins();
-            browser = BrowserFactory.CreateBrowser(settingsModel.BrowserType, settingsModel.UserProfilePath);
-            browser?.StartTenBisWebsite();
-            browser?.ValidateUserLoggedIn();
-            isSuccessfullyAggregation = browser?.TryAggregateMoneyToPoints();
-            currentBalanceAmount = browser.GetCurrentPointsAmount();
+            BrowserSettingsModel? browserSettingsModel = SettingsHelper.GetBrowserSettins();
+            NotifySettingsModel? notifySettingsModel = SettingsHelper.GetNotifySettins();
+            communcation = NotifierFactory.CreateNotifier(notifySettingsModel);
+            bool? runScript = communcation?.ValidateRunningScript();
+            if (!runScript.HasValue || !runScript.Value)
+            {
+                return 1;
+            }
 
-            return 0;
+            return SeleniumTenBisAggregation.Aggrgate(browserSettingsModel, out message);
         }
         catch (Exception exception)
         {
@@ -37,9 +39,7 @@ internal class Program
         }
         finally
         {
-            browser?.Dispose();
-            INotifier notify = NotifierFactory.CreateNotifier(settingsModel.NotifyType, settingsModel.NotifyTo, currentBalanceAmount, isSuccessfullyAggregation);
-            notify?.Notify();
+            communcation?.Notify(message);
         }
     }
 }

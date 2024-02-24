@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using MimeKit.Text;
+using MimeKit;
+using NLog;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 
@@ -13,9 +15,11 @@ namespace TenBis.Classes.Browser
         protected ReadOnlyCollection<IWebElement> _dropDownImage;
         protected ReadOnlyCollection<IWebElement> _currentBalanceSpan;
         protected int _amountOfTries;
+        public bool AggregatedSuccesfully { get; set; }
         public TenBisBrowser()
         {
             _amountOfTries = 0;
+            AggregatedSuccesfully = false;
         }
 
         protected bool TryClickingOnAggregateButton()
@@ -59,10 +63,15 @@ namespace TenBis.Classes.Browser
         }
 
 
-        protected string GetCurrentPointsAmount()
+        protected string GetMessage()
         {
             Task.Delay(1000).Wait();
-            return _currentBalanceSpan[0].Text;
+
+            string? currentBalance = string.IsNullOrEmpty(_currentBalanceSpan[0].Text) ? null : $"Your current balance is: {_currentBalanceSpan[0].Text}";
+            string updateStatus = AggregatedSuccesfully ? "successfully updated" : "failed to update";
+            string message = @$"10 Bis {updateStatus}
+{currentBalance}";
+            return message;
         }
 
         protected void ValidateUserLoggedIn()
