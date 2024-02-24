@@ -42,7 +42,7 @@ namespace TenBis.Classes.Notifiers
                 }
             });
 
-            string question = "Would you like to aggregate your money?";
+            string question = "Would you like to aggregate your points?";
             _botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions);
             _botClient.SendTextMessageAsync(_chatId, question, replyMarkup: reply);
 
