@@ -4,5 +4,6 @@
     {
         public void Notify(string message);
         bool? ValidateRunningScript();
+        void ValidateWithUserMessage();
     }
 }

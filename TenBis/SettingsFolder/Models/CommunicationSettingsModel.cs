@@ -3,7 +3,7 @@ using TenBis.Enums;
 
 namespace TenBis.SettingsFolder.Models
 {
-    internal class NotifySettingsModel
+    internal class CommunicationSettingsModel
     {
         [JsonConverter(typeof(NotifyType))]
         public NotifyType NotifyType { get; set; }

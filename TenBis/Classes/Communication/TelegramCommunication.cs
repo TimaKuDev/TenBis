@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using NLog;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -12,6 +13,7 @@ namespace TenBis.Classes.Notifiers
         private readonly long _chatId;
         public readonly ITelegramBotClient _botClient;
         private bool? runScript;
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         public TelegramCommunication(string token, long chatId)
         {
             _chatId = chatId;
@@ -77,6 +79,21 @@ namespace TenBis.Classes.Notifiers
 
             string output = $"The script {message}";
             await (_ = _botClient.SendTextMessageAsync(_chatId, output, cancellationToken: token));
+        }
+
+        public void ValidateWithUserMessage()
+        {
+            InlineKeyboardMarkup reply = new InlineKeyboardMarkup(new[]
+            {
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("Yes", "True"),
+                    InlineKeyboardButton.WithCallbackData("No", "False")
+                }
+            });
+
+            const string QUESTION = "Would you like to aggregate your points?";
+            _botClient.SendTextMessageAsync(_chatId, QUESTION, replyMarkup: reply);
         }
     }
 }

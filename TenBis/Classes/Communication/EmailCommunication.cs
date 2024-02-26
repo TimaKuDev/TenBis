@@ -2,6 +2,7 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
+using NLog;
 using TenBis.Interfaces;
 
 namespace TenBis.Classes.Notifiers
@@ -9,6 +10,7 @@ namespace TenBis.Classes.Notifiers
     internal class EmailCommunication : ICommunication
     {
         private readonly string _notifyTo;
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         public EmailCommunication(string notifyTo)
         {
@@ -53,6 +55,10 @@ namespace TenBis.Classes.Notifiers
         public bool? ValidateRunningScript()
         {
             return true;
+        }
+
+        public void ValidateWithUserMessage()
+        {
         }
     }
 }
