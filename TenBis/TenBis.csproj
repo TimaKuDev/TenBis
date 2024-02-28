@@ -23,11 +23,11 @@
 
   <ItemGroup>
     <None Remove="BrowserSettings.js" />
-    <None Remove="NotifySettings.js" />
+    <None Remove="CommunicationSettings.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="NotifySettings.js">
+    <AdditionalFiles Include="CommunicationSettings.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
     <AdditionalFiles Include="BrowserSettings.js">

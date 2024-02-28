@@ -8,7 +8,7 @@ namespace TenBis.SettingsFolder
     internal static class SettingsHelper
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        public static BrowserSettingsModel GetBrowserSettins()
+        public static BrowserSettingsModel GetBrowserSettings()
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Starting getting the user path");
             using StreamReader reader = new StreamReader("BrowserSettings.js");
@@ -19,10 +19,10 @@ namespace TenBis.SettingsFolder
             return deserializedBrowserSettinsModel;
         }
 
-        public static CommunicationSettingsModel GetNotifySettins()
+        public static CommunicationSettingsModel GetCommunicationSettings()
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Starting getting the user path");
-            using StreamReader reader = new StreamReader("NotifySettings.js");
+            using StreamReader reader = new StreamReader("CommunicationSettings.js");
             string chromeUserPathJS = reader.ReadToEnd();
             CommunicationSettingsModel? deserializedChromePathModel = JsonConvert.DeserializeObject<CommunicationSettingsModel>(chromeUserPathJS);
 

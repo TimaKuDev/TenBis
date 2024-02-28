@@ -15,8 +15,8 @@ namespace TenBis.Classes
         {
             try
             {
-                BrowserSettingsModel? browserSettingsModel = SettingsHelper.GetBrowserSettins();
-                CommunicationSettingsModel? notifySettingsModel = SettingsHelper.GetNotifySettins();
+                BrowserSettingsModel? browserSettingsModel = SettingsHelper.GetBrowserSettings();
+                CommunicationSettingsModel? notifySettingsModel = SettingsHelper.GetCommunicationSettings();
                 SeleniumTenBisAggregation seleniumTenBisAggregation = new SeleniumTenBisAggregation(browserSettingsModel);
                 ICommunication communcation = NotifierFactory.CreateNotifier(notifySettingsModel, seleniumTenBisAggregation);
                 communcation?.AlertContactAboutScript();
