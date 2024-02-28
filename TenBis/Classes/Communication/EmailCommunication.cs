@@ -12,7 +12,7 @@ namespace TenBis.Classes.Notifiers
         private readonly string _notifyTo;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        public EmailCommunication(string notifyTo)
+        public EmailCommunication(string notifyTo, IAggrgate aggrgate)
         {
             _notifyTo = notifyTo;
         }
@@ -52,12 +52,12 @@ namespace TenBis.Classes.Notifiers
             }
         }
 
-        public bool? ValidateRunningScript()
+        public void ValidateRunningScript()
         {
-            return true;
+            
         }
 
-        public void ValidateWithUserMessage()
+        public void AlertContactAboutScript()
         {
         }
     }

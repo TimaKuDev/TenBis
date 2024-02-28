@@ -11,44 +11,36 @@ namespace TenBis.Classes.Notifiers
     internal class TelegramCommunication : ICommunication
     {
         private readonly long _chatId;
+        private readonly IAggrgate _aggrgate;
         public readonly ITelegramBotClient _botClient;
-        private bool? runScript;
+        private static bool runScript;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        public TelegramCommunication(string token, long chatId)
+
+        public TelegramCommunication(string token, long chatId, IAggrgate aggrgate)
         {
             _chatId = chatId;
-            _botClient = new TelegramBotClient(token) { Timeout = TimeSpan.FromSeconds(10) };
+            _aggrgate = aggrgate;
+            _botClient = new TelegramBotClient(token);
         }
 
-        public void Notify(string message)
+        public void NotifyContact(string message)
         {
             _botClient.SendTextMessageAsync(_chatId, message);
         }
 
-        public bool? ValidateRunningScript()
+        public void AlertContactAboutScript()
         {
-            ReceiverOptions receiverOptions = new ReceiverOptions
-            {
-                AllowedUpdates = new UpdateType[]
-                {
-                    UpdateType.CallbackQuery
-                }
-            };
-
             InlineKeyboardMarkup reply = new InlineKeyboardMarkup(new[]
             {
                 new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("Yes", "True"),
-                    InlineKeyboardButton.WithCallbackData("No", "False")
+                    InlineKeyboardButton.WithCallbackData("Yes", bool.TrueString),
+                    InlineKeyboardButton.WithCallbackData("No", bool.FalseString)
                 }
             });
 
-            string question = "Would you like to aggregate your points?";
-            _botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions);
-            _botClient.SendTextMessageAsync(_chatId, question, replyMarkup: reply);
-
-            return runScript;
+            const string QUESTION = "Would you like to aggregate your money to points?";
+            _botClient.SendTextMessageAsync(_chatId, QUESTION, replyMarkup: reply);
         }
 
         private async Task ErrorHandler(ITelegramBotClient client, Exception exception, CancellationToken token)
@@ -63,37 +55,52 @@ namespace TenBis.Classes.Notifiers
                 return;
             }
 
-            string userSelectionMessage = update.CallbackQuery.Data;
-            runScript = bool.Parse(userSelectionMessage);
-            if (!runScript.HasValue)
+            NotifyContactAboutDecision(update.CallbackQuery.Data);
+            string? message = null;
+            bool? x = _aggrgate?.TryAggrgate(out message);
+            if (!x.HasValue || !x.Value)
             {
-                return;
+                NotifyContactAboutFailure(message);
             }
 
-            string message = $"would run at {DateTime.Now}";
-            if (!runScript.Value)
-            {
-                message = "wouldn't run";
-            }
-
-
-            string output = $"The script {message}";
-            await (_ = _botClient.SendTextMessageAsync(_chatId, output, cancellationToken: token));
+            NotifyContactAboutSuccess(message);
         }
 
-        public void ValidateWithUserMessage()
+        private void NotifyContactAboutSuccess(string? message)
         {
-            InlineKeyboardMarkup reply = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Yes", "True"),
-                    InlineKeyboardButton.WithCallbackData("No", "False")
-                }
-            });
+            NotifyContact(message);
+        }
 
-            const string QUESTION = "Would you like to aggregate your points?";
-            _botClient.SendTextMessageAsync(_chatId, QUESTION, replyMarkup: reply);
+        private void NotifyContactAboutFailure(string? message)
+        {
+            message = string.IsNullOrEmpty(message) ? "The script failed to aggregate money to points" : message;
+            NotifyContact(message);
+            Environment.Exit(1);
+        }
+
+        private void NotifyContactAboutDecision(string userSelectionMessage)
+        {
+            runScript = bool.Parse(userSelectionMessage);
+            string message = runScript ? "would run immediately" : "wouldn't run";
+            message = $"The script {message}";
+            NotifyContact(message);
+            if (!runScript)
+            {
+                Environment.Exit(1);
+            }
+        }
+
+        public void ValidateRunningScript()
+        {
+            ReceiverOptions receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = new UpdateType[]
+    {
+                    UpdateType.CallbackQuery
+    }
+            };
+
+            _botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions);
         }
     }
 }

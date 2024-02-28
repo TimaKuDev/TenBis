@@ -7,14 +7,14 @@ namespace TenBis.Factories
 {
     internal class NotifierFactory
     {
-        internal static ICommunication CreateNotifier(CommunicationSettingsModel notifySettingsModel)
+        internal static ICommunication CreateNotifier(CommunicationSettingsModel notifySettingsModel, IAggrgate aggrgate)
         {
             switch (notifySettingsModel.NotifyType)
             {
                 case NotifyType.Email:
-                    return new EmailCommunication(notifySettingsModel.NotifyTo);
+                    return new EmailCommunication(notifySettingsModel.NotifyTo, aggrgate);
                 case NotifyType.Telegram:
-                    return new TelegramCommunication(notifySettingsModel.Token, notifySettingsModel.ChatId);
+                    return new TelegramCommunication(notifySettingsModel.Token, notifySettingsModel.ChatId, aggrgate);
                 default:
                     return null;
             }

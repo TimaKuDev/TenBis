@@ -1,6 +1,4 @@
-﻿using MimeKit.Text;
-using MimeKit;
-using NLog;
+﻿using NLog;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 
@@ -62,16 +60,14 @@ namespace TenBis.Classes.Browser
             return true;
         }
 
-
         protected string GetMessage()
         {
             Task.Delay(1000).Wait();
 
+            string updateStatus = AggregatedSuccesfully ? "The script successfully aggregated money to points " : "The script failed to aggregated money to ";
             string? currentBalance = string.IsNullOrEmpty(_currentBalanceSpan[0].Text) ? null : $"Your current balance is: {_currentBalanceSpan[0].Text}";
-            string updateStatus = AggregatedSuccesfully ? "successfully updated" : "failed to update";
-            string message = @$"10 Bis {updateStatus}
+            return @$"10 Bis {updateStatus}
 {currentBalance}";
-            return message;
         }
 
         protected void ValidateUserLoggedIn()
