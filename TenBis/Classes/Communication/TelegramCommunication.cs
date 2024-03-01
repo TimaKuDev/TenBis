@@ -11,20 +11,25 @@ namespace TenBis.Classes.Notifiers
     internal class TelegramCommunication : ICommunication
     {
         private readonly long _chatId;
-        private readonly IAggrgate _aggrgate;
+        private readonly IAggregate _aggrgate;
         public readonly ITelegramBotClient _botClient;
         private static bool runScript;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        public TelegramCommunication(string token, long chatId, IAggrgate aggrgate)
+        public TelegramCommunication(string token, long chatId, IAggregate aggrgate)
         {
             _chatId = chatId;
             _aggrgate = aggrgate;
             _botClient = new TelegramBotClient(token);
         }
 
-        public void NotifyContact(string message)
+        private void NotifyContact(string message)
         {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
             _botClient.SendTextMessageAsync(_chatId, message);
         }
 
@@ -56,25 +61,8 @@ namespace TenBis.Classes.Notifiers
             }
 
             NotifyContactAboutDecision(update.CallbackQuery.Data);
-            string? message = null;
-            bool? x = _aggrgate?.TryAggrgate(out message);
-            if (!x.HasValue || !x.Value)
-            {
-                NotifyContactAboutFailure(message);
-            }
-
-            NotifyContactAboutSuccess(message);
-        }
-
-        private void NotifyContactAboutSuccess(string? message)
-        {
-            NotifyContact(message);
-        }
-
-        private void NotifyContactAboutFailure(string? message)
-        {
-            message = string.IsNullOrEmpty(message) ? "The script failed to aggregate money to points" : message;
-            NotifyContact(message);
+            string? message = _aggrgate?.Aggregate();
+            NotifyContact(message!);
             Environment.Exit(1);
         }
 

@@ -64,9 +64,9 @@ namespace TenBis.Classes.Browser
         {
             Task.Delay(1000).Wait();
 
-            string updateStatus = AggregatedSuccesfully ? "The script successfully aggregated money to points " : "The script failed to aggregated money to ";
-            string? currentBalance = string.IsNullOrEmpty(_currentBalanceSpan[0].Text) ? null : $"Your current balance is: {_currentBalanceSpan[0].Text}";
-            return @$"10 Bis {updateStatus}
+            string updateStatus = AggregatedSuccesfully ? "The script successfully aggregated money to points" : "The script failed to aggregated money to points";
+            string? currentBalance = string.IsNullOrEmpty(_currentBalanceSpan[0].Text) ? null : $"As of {DateTime.Now:dd-MM-yyyy}, you have {_currentBalanceSpan[0].Text} points";
+            return @$"{updateStatus}
 {currentBalance}";
         }
 

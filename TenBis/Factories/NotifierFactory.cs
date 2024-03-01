@@ -7,7 +7,7 @@ namespace TenBis.Factories
 {
     internal class NotifierFactory
     {
-        internal static ICommunication CreateNotifier(CommunicationSettingsModel notifySettingsModel, IAggrgate aggrgate)
+        internal static ICommunication CreateNotifier(CommunicationSettingsModel notifySettingsModel, IAggregate aggrgate)
         {
             switch (notifySettingsModel.NotifyType)
             {

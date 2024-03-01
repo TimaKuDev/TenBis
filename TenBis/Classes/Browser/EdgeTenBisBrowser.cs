@@ -82,10 +82,9 @@ namespace TenBis.Classes.Browser
             base.ValidateUserLoggedIn();
         }
 
-        public string? GetMessage()
+        public string GetMessage()
         {
             _currentBalanceSpan = _edgeDriver.FindElements(By.ClassName(TenBisWebsiteInfo.CurrentBalanceSpanElement));
-
             return base.GetMessage();
         }
     }
