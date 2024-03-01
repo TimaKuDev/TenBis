@@ -8,8 +8,13 @@ namespace TenBis.Classes.Aggregation
     {
         private readonly BrowserSettingsModel _browserSettingsModel;
 
-        public SeleniumTenBisAggregation(BrowserSettingsModel browserSettingsModel)
+        public SeleniumTenBisAggregation(BrowserSettingsModel? browserSettingsModel)
         {
+            if (browserSettingsModel is null)
+            {
+                throw new ArgumentNullException(nameof(browserSettingsModel));
+            }
+
             _browserSettingsModel = browserSettingsModel;
         }
 
@@ -19,7 +24,9 @@ namespace TenBis.Classes.Aggregation
             browser?.StartTenBisWebsite();
             browser?.ValidateUserLoggedIn();
             browser?.AggregateMoneyToPoints();
-            return browser?.GetMessage() ?? "Failed to create a browser, in order to aggregate money to points";
+            string messsage = browser?.GetMessage() ?? "Failed to create a browser, in order to aggregate money to points";
+            browser.Dispose();
+            return messsage;
         }
     }
 }

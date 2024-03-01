@@ -5,7 +5,7 @@ using TenBis.Interfaces;
 
 namespace TenBis.Classes.Browser
 {
-    internal class ChromeTenBisBrowser : TenBisBrowser, IBrowser
+    internal class ChromeTenBisBrowser : TenBisBrowser, IBrowser, IDisposable
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly ChromeDriverService _chromeDriverService;
