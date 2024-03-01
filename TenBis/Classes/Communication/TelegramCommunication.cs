@@ -13,7 +13,6 @@ namespace TenBis.Classes.Notifiers
         private readonly long _chatId;
         private readonly IAggregate _aggrgate;
         public readonly ITelegramBotClient _botClient;
-        private static bool runScript;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         public TelegramCommunication(string token, long chatId, IAggregate aggrgate)
@@ -60,22 +59,22 @@ namespace TenBis.Classes.Notifiers
                 return;
             }
 
-            NotifyContactAboutDecision(update.CallbackQuery.Data);
-            string? message = _aggrgate?.Aggregate();
-            NotifyContact(message!);
+            bool runScript = bool.Parse(update.CallbackQuery.Data);
+            NotifyContactAboutDecision(runScript);
+            if (runScript)
+            {
+                string? message = _aggrgate?.Aggregate();
+                NotifyContact(message!);
+            }
+
             Environment.Exit(1);
         }
 
-        private void NotifyContactAboutDecision(string userSelectionMessage)
+        private void NotifyContactAboutDecision(bool runScript)
         {
-            runScript = bool.Parse(userSelectionMessage);
             string message = runScript ? "would run immediately" : "wouldn't run";
             message = $"The script {message}";
             NotifyContact(message);
-            if (!runScript)
-            {
-                Environment.Exit(1);
-            }
         }
 
         public void ValidateRunningScript()

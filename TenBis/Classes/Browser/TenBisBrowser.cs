@@ -14,7 +14,7 @@ namespace TenBis.Classes.Browser
         protected ReadOnlyCollection<IWebElement> _currentBalanceSpan;
         protected int _amountOfTries;
         public bool AggregatedSuccesfully { get; set; }
-        public TenBisBrowser()
+        protected TenBisBrowser()
         {
             _amountOfTries = 0;
             AggregatedSuccesfully = false;

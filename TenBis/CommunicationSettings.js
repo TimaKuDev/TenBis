@@ -1,6 +1,6 @@
 ﻿{
     "NotifyType": "Telegram",
     "NotifyTo": "TenBisNotifier@gmail.com",
-    "Token": "1:AAGyMShywFK2tZXVe0A3dATY3zXuWOD-eBc",
+    "Token": "1:1-eBc",
     "ChatId": "1"
 }

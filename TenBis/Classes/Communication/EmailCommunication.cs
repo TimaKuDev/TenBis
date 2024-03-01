@@ -3,7 +3,6 @@ using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
 using NLog;
-using Telegram.Bot.Types;
 using TenBis.Interfaces;
 
 namespace TenBis.Classes.Notifiers
@@ -20,7 +19,7 @@ namespace TenBis.Classes.Notifiers
             _aggrgate = aggrgate;
         }
 
-        public void Notify(string message)
+        public void NotifyContact(string message)
         {
             if (string.IsNullOrEmpty(_notifyTo))
             {
@@ -57,7 +56,9 @@ namespace TenBis.Classes.Notifiers
 
         public void ValidateRunningScript()
         {
-            bool? aggregatedSuccessfully = _aggrgate?.TryAggrgate(out message);
+            string? message = _aggrgate?.Aggregate();
+            NotifyContact(message!);
+            Environment.Exit(0);
         }
 
         public void AlertContactAboutScript()
