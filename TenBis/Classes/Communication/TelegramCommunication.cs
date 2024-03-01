@@ -29,16 +29,20 @@ namespace TenBis.Classes.Notifiers
 
         private void NotifyContact(string message)
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Starting notifying contact");
             if (string.IsNullOrEmpty(message))
             {
                 return;
             }
 
             _botClient.SendTextMessageAsync(_chatId, message);
+            _logger.Info($"{Helper.GetCurrentMethod()}: Finished notifying contact");
         }
 
         public void AlertContactAboutScript()
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Starting alerting contact about the script");
+
             InlineKeyboardMarkup reply = new InlineKeyboardMarkup(new[]
             {
                 new[]
@@ -50,6 +54,7 @@ namespace TenBis.Classes.Notifiers
 
             const string QUESTION = "Would you like to aggregate your money to points?";
             _botClient.SendTextMessageAsync(_chatId, QUESTION, replyMarkup: reply);
+            _logger.Info($"{Helper.GetCurrentMethod()}: Finished alerting contact about the script");
         }
 
         private async Task ErrorHandler(ITelegramBotClient client, Exception exception, CancellationToken token)
@@ -59,6 +64,7 @@ namespace TenBis.Classes.Notifiers
 
         private async Task UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Started getting response from the contact");
             if (update.Type is not UpdateType.CallbackQuery || update.CallbackQuery?.Data is null)
             {
                 return;
@@ -72,18 +78,22 @@ namespace TenBis.Classes.Notifiers
                 NotifyContact(message!);
             }
 
+            _logger.Info($"{Helper.GetCurrentMethod()}: Finished getting response from the contact");
             Environment.Exit(1);
         }
 
         private void NotifyContactAboutDecision(bool runScript)
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Starting notifying contact about his decision");
             string message = runScript ? "would run immediately" : "wouldn't run";
             message = $"The script {message}";
             NotifyContact(message);
+            _logger.Info($"{Helper.GetCurrentMethod()}: Finished notifying contact about his decision");
         }
 
         public void ValidateRunningScript()
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Starting listening to contact response");
             ReceiverOptions receiverOptions = new ReceiverOptions
             {
                 AllowedUpdates = new UpdateType[]

@@ -5,18 +5,19 @@ using TenBis.Interfaces;
 
 namespace TenBis.Classes.Browser
 {
-    internal class FireFoxTenBisBrowser : TenBisBrowser, IBrowser
+    internal class FireFoxTenBisBrowser : IBrowser
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private readonly FirefoxDriverService _firefoxDriverService;
         private readonly FirefoxOptions _firefoxOptions;
         private readonly FirefoxDriver _firefoxDriver;
+        private bool _aggregatedSuccessfully;
 
         public FireFoxTenBisBrowser(string? userProfilePath)
         {
             _logger.Info($"{Helper.GetCurrentMethod()} Settings initialization began");
 
-            _amountOfTries = 0;
+            _aggregatedSuccessfully = false;
             _firefoxDriverService = FirefoxDriverService.CreateDefaultService();
             _firefoxOptions = new FirefoxOptions();
             _firefoxOptions.AddArgument($"--user-data-dir={userProfilePath}");
@@ -43,25 +44,22 @@ namespace TenBis.Classes.Browser
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Initiating the process of money aggregation");
 
-            _aggregateButton = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.LoadCardButtonElement));
-            if (!TryClickingOnAggregateButton())
+            if (!TenBisBrowser.TryClickingOnAggregateButton(_firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.LoadCardButtonElement))))
             {
                 return;
             }
 
-            _continueButton = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.ContinueButtonElement));
-            if (!TryClickingOnContinueButton())
+            if (!TenBisBrowser.TryClickingOnContinueButton(_firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.ContinueButtonElement))))
             {
                 return;
             }
 
-            _chargeCardButton = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.ChargeCardButtonElement));
-            if (!TryClickingOnChargeButton())
+            if (!TenBisBrowser.TryClickingOnChargeButton(_firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.ChargeCardButtonElement))))
             {
                 return;
             }
 
-            AggregatedSuccessfully = true;
+            _aggregatedSuccessfully = true;
             _logger.Info($"{Helper.GetCurrentMethod()}: The process of money aggregation has been successfully completed");
         }
 
@@ -75,17 +73,21 @@ namespace TenBis.Classes.Browser
             _logger.Info($"{Helper.GetCurrentMethod()}: Website 10Bis has been successfully launched.");
         }
 
-        public void ValidateUserLoggedIn()
+        public void IsUserLoggedInValidation()
         {
-            Task.Delay(1500).Wait();
-            _dropDownImage = _firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.DropDownImageElement));
-            base.ValidateUserLoggedIn();
+            Task.Delay(2000);
+            _logger.Info($"{Helper.GetCurrentMethod()}: Initiating validation if user is logged in.");
+            if (!TenBisBrowser.IsUserLoggedIn(_firefoxDriver.FindElements(By.XPath(TenBisWebsiteInfo.DropDownImageElement))))
+            {
+                IsUserLoggedInValidation();
+            }
+
+            _logger.Info($"{Helper.GetCurrentMethod()}: Finished validation if user is logged in.");
         }
 
         public string GetMessage()
         {
-            _currentBalanceSpan = _firefoxDriver.FindElements(By.ClassName(TenBisWebsiteInfo.CurrentBalanceSpanElement));
-            return base.GetMessage();
+            return TenBisBrowser.GetMessage(_aggregatedSuccessfully, _firefoxDriver.FindElements(By.ClassName(TenBisWebsiteInfo.CurrentBalanceSpanElement)));
         }
     }
 }

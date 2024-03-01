@@ -2,9 +2,7 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
-using Newtonsoft.Json.Linq;
 using NLog;
-using Telegram.Bot.Types;
 using TenBis.Interfaces;
 
 namespace TenBis.Classes.Notifiers
@@ -28,6 +26,7 @@ namespace TenBis.Classes.Notifiers
 
         public void NotifyContact(string message)
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Starting notifying contact");
             if (string.IsNullOrEmpty(_notifyTo))
             {
                 return;
@@ -59,10 +58,13 @@ namespace TenBis.Classes.Notifiers
                 client.Disconnect(true);
                 client.Dispose();
             }
+
+            _logger.Info($"{Helper.GetCurrentMethod()}: Finished notifying contact");
         }
 
         public void ValidateRunningScript()
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: Starting listening to contact response");
             string? message = _aggregate?.Aggregate();
             NotifyContact(message!);
             Environment.Exit(0);

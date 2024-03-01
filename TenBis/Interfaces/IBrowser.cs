@@ -1,10 +1,10 @@
 ﻿namespace TenBis.Interfaces
 {
-    internal interface IBrowser : IDisposable
+    internal interface IBrowser: IDisposable
     {
         public void StartTenBisWebsite();
-        public void ValidateUserLoggedIn();
+        public void IsUserLoggedInValidation();
         public void AggregateMoneyToPoints();
-        string? GetMessage();
+        public string GetMessage();
     }
 }
