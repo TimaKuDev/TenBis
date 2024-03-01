@@ -8,7 +8,7 @@ namespace TenBis.SettingsFolder.Models
         [JsonConverter(typeof(BrowserType))]
         public BrowserType BrowserType { get; set; }
 
-        public string UserProfilePath { get; set; }
+        public string? UserProfilePath { get; set; }
 
     }
 }

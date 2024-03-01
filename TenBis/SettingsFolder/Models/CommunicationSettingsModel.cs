@@ -7,8 +7,8 @@ namespace TenBis.SettingsFolder.Models
     {
         [JsonConverter(typeof(NotifyType))]
         public NotifyType NotifyType { get; set; }
-        public string NotifyTo { get; set; }
-        public string Token { get; set; }
-        public long ChatId { get; set; }
+        public string? NotifyTo { get; set; }
+        public string? Token { get; set; }
+        public long? ChatId { get; set; }
     }
 }

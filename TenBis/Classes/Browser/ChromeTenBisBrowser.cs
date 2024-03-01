@@ -61,7 +61,7 @@ namespace TenBis.Classes.Browser
                 return;
             }
 
-            AggregatedSuccesfully = true;
+            AggregatedSuccessfully = true;
             _logger.Info($"{Helper.GetCurrentMethod()}: The process of money aggregation has been successfully completed");
         }
 

@@ -7,7 +7,7 @@ using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Classes
 {
-    internal class TenBisScript
+    internal static class TenBisScript
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
@@ -17,8 +17,8 @@ namespace TenBis.Classes
             {
                 BrowserSettingsModel? browserSettingsModel = SettingsHelper.GetBrowserSettings();
                 CommunicationSettingsModel? notifySettingsModel = SettingsHelper.GetCommunicationSettings();
-                SeleniumTenBisAggregation seleniumTenBisAggregation = new SeleniumTenBisAggregation(browserSettingsModel);
-                ICommunication communcation = NotifierFactory.CreateNotifier(notifySettingsModel, seleniumTenBisAggregation);
+                SeleniumTenBisAggregation seleniumTenBisAggregation = new SeleniumTenBisAggregation(browserSettingsModel!);
+                ICommunication? communcation = NotifierFactory.CreateNotifier(notifySettingsModel, seleniumTenBisAggregation);
                 communcation?.AlertContactAboutScript();
                 communcation?.ValidateRunningScript();
                 Console.ReadLine();

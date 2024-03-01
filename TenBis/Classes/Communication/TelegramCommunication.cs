@@ -11,14 +11,19 @@ namespace TenBis.Classes.Notifiers
     internal class TelegramCommunication : ICommunication
     {
         private readonly long _chatId;
-        private readonly IAggregate _aggrgate;
+        private readonly IAggregate _aggregate;
         public readonly ITelegramBotClient _botClient;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        public TelegramCommunication(string token, long chatId, IAggregate aggrgate)
+        public TelegramCommunication(string? token, long? chatId, IAggregate aggregate)
         {
-            _chatId = chatId;
-            _aggrgate = aggrgate;
+            if (string.IsNullOrEmpty(token) || !chatId.HasValue || aggregate is null)
+            {
+                throw new Exception();
+            }
+
+            _chatId = chatId.Value;
+            _aggregate = aggregate;
             _botClient = new TelegramBotClient(token);
         }
 
@@ -63,7 +68,7 @@ namespace TenBis.Classes.Notifiers
             NotifyContactAboutDecision(runScript);
             if (runScript)
             {
-                string? message = _aggrgate?.Aggregate();
+                string? message = _aggregate?.Aggregate();
                 NotifyContact(message!);
             }
 

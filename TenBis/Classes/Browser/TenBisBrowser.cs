@@ -13,11 +13,11 @@ namespace TenBis.Classes.Browser
         protected ReadOnlyCollection<IWebElement> _dropDownImage;
         protected ReadOnlyCollection<IWebElement> _currentBalanceSpan;
         protected int _amountOfTries;
-        public bool AggregatedSuccesfully { get; set; }
+        public bool AggregatedSuccessfully { get; set; }
         protected TenBisBrowser()
         {
             _amountOfTries = 0;
-            AggregatedSuccesfully = false;
+            AggregatedSuccessfully = false;
         }
 
         protected bool TryClickingOnAggregateButton()
@@ -64,7 +64,7 @@ namespace TenBis.Classes.Browser
         {
             Task.Delay(1000).Wait();
 
-            string updateStatus = AggregatedSuccesfully ? "The script successfully aggregated money to points" : "The script failed to aggregated money to points";
+            string updateStatus = AggregatedSuccessfully ? "The script successfully aggregated money to points" : "The script failed to aggregated money to points";
             string? currentBalance = string.IsNullOrEmpty(_currentBalanceSpan[0].Text) ? null : $"As of {DateTime.Now:dd-MM-yyyy}, you have {_currentBalanceSpan[0].Text} points";
             return @$"{updateStatus}
 {currentBalance}";

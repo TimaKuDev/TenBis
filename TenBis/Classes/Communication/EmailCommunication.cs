@@ -2,7 +2,9 @@
 using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
+using Newtonsoft.Json.Linq;
 using NLog;
+using Telegram.Bot.Types;
 using TenBis.Interfaces;
 
 namespace TenBis.Classes.Notifiers
@@ -10,13 +12,18 @@ namespace TenBis.Classes.Notifiers
     internal class EmailCommunication : ICommunication
     {
         private readonly string _notifyTo;
-        private readonly IAggregate _aggrgate;
+        private readonly IAggregate _aggregate;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        public EmailCommunication(string notifyTo, IAggregate aggrgate)
+        public EmailCommunication(string? notifyTo, IAggregate aggregate)
         {
+            if (string.IsNullOrEmpty(notifyTo) || aggregate is null)
+            {
+                throw new Exception();
+            }
+
             _notifyTo = notifyTo;
-            _aggrgate = aggrgate;
+            _aggregate = aggregate;
         }
 
         public void NotifyContact(string message)
@@ -56,7 +63,7 @@ namespace TenBis.Classes.Notifiers
 
         public void ValidateRunningScript()
         {
-            string? message = _aggrgate?.Aggregate();
+            string? message = _aggregate?.Aggregate();
             NotifyContact(message!);
             Environment.Exit(0);
         }

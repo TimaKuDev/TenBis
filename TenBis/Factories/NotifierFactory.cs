@@ -5,10 +5,15 @@ using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Factories
 {
-    internal class NotifierFactory
+    internal static class NotifierFactory
     {
-        internal static ICommunication CreateNotifier(CommunicationSettingsModel notifySettingsModel, IAggregate aggrgate)
+        internal static ICommunication? CreateNotifier(CommunicationSettingsModel? notifySettingsModel, IAggregate aggrgate)
         {
+            if (notifySettingsModel == null)
+            {
+                throw new ArgumentNullException(nameof(notifySettingsModel));
+            }
+
             switch (notifySettingsModel.NotifyType)
             {
                 case NotifyType.Email:

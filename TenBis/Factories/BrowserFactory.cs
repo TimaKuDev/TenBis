@@ -6,8 +6,13 @@ namespace TenBis.Factories
 {
     internal static class BrowserFactory
     {
-        public static IBrowser CreateBrowser(BrowserType browserTypeEnum, string userProfilePath)
+        public static IBrowser CreateBrowser(BrowserType browserTypeEnum, string? userProfilePath)
         {
+            if (string.IsNullOrEmpty(userProfilePath)) 
+            {
+                throw new ArgumentNullException();
+            }
+
             switch (browserTypeEnum)
             {
                 case BrowserType.Chrome:
