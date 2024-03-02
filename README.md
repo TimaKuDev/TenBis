@@ -128,7 +128,8 @@ Customize the browser type and user profile path according to your preferences.
 
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+<img width="463" alt="image" src="https://github.com/TimaKuDev/TenBis/assets/53705199/19bb5500-abdb-4c87-b34d-b404eb6827f7">
+
 
 
 ## Support
