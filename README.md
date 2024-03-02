@@ -66,8 +66,7 @@ Customize the browser type and user profile path according to your preferences.
 - Decide how you want to receive notifications:
     * Telegram:
         * Change the NotifyType to “Telegram”.
-        * Go to Telegram and find “BotFather.”
-        * Run the command ```/newbot``` and follow the instructions to receive an access token.
+        * Go to Telegram and find “BotFather” Run the command ```/newbot``` and follow the instructions to receive an access token.
         * Find “Telegram Bot Raw” and run ```/start``` to get a JSON response. Copy the message.chat.id.
         * Insert both the token and chat ID into the CommunicationSettings:
         **JSON**
