@@ -20,17 +20,29 @@ namespace TenBis.Classes.Aggregation
         }
 
         public string Aggregate()
-
         {
-            _logger.Info($"{Helper.GetCurrentMethod()}: Starting aggregating");
-            IBrowser browser = BrowserFactory.CreateBrowser(_browserSettingsModel.BrowserType, _browserSettingsModel.UserProfilePath);
-            browser?.StartTenBisWebsite();
-            browser?.IsUserLoggedInValidation();
-            browser?.AggregateMoneyToPoints();
-            string messsage = browser?.GetMessage() ?? "Failed to create a browser, in order to aggregate money to points";
-            browser?.Dispose();
-            _logger.Info($"{Helper.GetCurrentMethod()}: Finished, aggregating");
-            return messsage;
+            IBrowser? browser = null;
+            try
+            {
+                _logger.Info($"{Helper.GetCurrentMethod()}: Starting aggregating");
+                browser = BrowserFactory.CreateBrowser(_browserSettingsModel.BrowserType, _browserSettingsModel.UserProfilePath);
+                browser?.StartTenBisWebsite();
+                browser?.IsUserLoggedInValidation();
+                browser?.AggregateMoneyToPoints();
+                string messsage = browser?.GetMessage() ?? "Failed to create a browser, in order to aggregate money to points";
+                _logger.Info($"{Helper.GetCurrentMethod()}: Finished, aggregating");
+                return messsage;
+
+            }
+            catch (Exception exception)
+            {
+                _logger.Error(exception.Message);
+                return "There was an error while trying to aggregate check the logs files.";
+            }
+            finally
+            {
+                browser?.Dispose();
+            }
         }
     }
 }

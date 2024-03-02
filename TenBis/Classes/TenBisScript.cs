@@ -13,8 +13,6 @@ namespace TenBis.Classes
 
         public static void RunScript()
         {
-            ///Tima: Stuffs to fix:
-            ///2. Make sure that the Telegram bot update actually finishes. ( add timer to check if need to run script)
             try
             {
                 _logger.Info($"{Helper.GetCurrentMethod()}: Starting running script");

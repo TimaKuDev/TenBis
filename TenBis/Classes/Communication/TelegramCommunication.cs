@@ -10,10 +10,15 @@ namespace TenBis.Classes.Notifiers
 {
     internal class TelegramCommunication : ICommunication
     {
+        private bool _isAggregatingProcessStarted;
         private readonly long _chatId;
+        private bool? _isScriptNeededToRun;
         private readonly IAggregate _aggregate;
-        public readonly ITelegramBotClient _botClient;
+        private readonly ITelegramBotClient _botClient;
+        private readonly DateTime _validUntilTime;
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly object _lockObject = new object();
+        private Timer? _timer;
 
         public TelegramCommunication(string? token, long? chatId, IAggregate aggregate)
         {
@@ -22,6 +27,9 @@ namespace TenBis.Classes.Notifiers
                 throw new Exception();
             }
 
+            _timer = null;
+            _isAggregatingProcessStarted = false;
+            _validUntilTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 18, 30, 0);
             _chatId = chatId.Value;
             _aggregate = aggregate;
             _botClient = new TelegramBotClient(token);
@@ -57,12 +65,12 @@ namespace TenBis.Classes.Notifiers
             _logger.Info($"{Helper.GetCurrentMethod()}: Finished alerting contact about the script");
         }
 
-        private async Task ErrorHandler(ITelegramBotClient client, Exception exception, CancellationToken token)
+        private void ErrorHandler(ITelegramBotClient client, Exception exception, CancellationToken token)
         {
             throw new NotImplementedException();
         }
 
-        private async Task UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
+        private void UpdateHandler(ITelegramBotClient client, Update update, CancellationToken token)
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Started getting response from the contact");
             if (update.Type is not UpdateType.CallbackQuery || update.CallbackQuery?.Data is null)
@@ -70,23 +78,31 @@ namespace TenBis.Classes.Notifiers
                 return;
             }
 
-            bool runScript = bool.Parse(update.CallbackQuery.Data);
-            NotifyContactAboutDecision(runScript);
-            if (runScript)
+            lock (_lockObject)
             {
-                string? message = _aggregate?.Aggregate();
-                NotifyContact(message!);
+                _isScriptNeededToRun = bool.Parse(update.CallbackQuery.Data);
             }
 
             _logger.Info($"{Helper.GetCurrentMethod()}: Finished getting response from the contact");
-            Environment.Exit(1);
         }
 
-        private void NotifyContactAboutDecision(bool runScript)
+        private void NotifyContactAboutDecision()
         {
             _logger.Info($"{Helper.GetCurrentMethod()}: Starting notifying contact about his decision");
-            string message = runScript ? "would run immediately" : "wouldn't run";
-            message = $"The script {message}";
+            string message;
+            if (!_isScriptNeededToRun.HasValue)
+            {
+                message = "Since you didn’t make a selection, the default option will be applied, and the script will be closed immediately.";
+            }
+            else if (!_isScriptNeededToRun.Value)
+            {
+                message = "Since you’ve chosen not to aggregate your money, the script will be closed immediately.";
+            }
+            else
+            {
+                message = "Since you’ve chosen to aggregate your money, the script will run immediately.";
+            }
+
             NotifyContact(message);
             _logger.Info($"{Helper.GetCurrentMethod()}: Finished notifying contact about his decision");
         }
@@ -103,6 +119,42 @@ namespace TenBis.Classes.Notifiers
             };
 
             _botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions);
+            var startTimeSpan = TimeSpan.Zero;
+            var periodTimeSpan = TimeSpan.FromSeconds(10);
+            _timer = new Timer((_) => CheckIfNeedToCloseScript(), null, startTimeSpan, periodTimeSpan);
+        }
+
+        private void CheckIfNeedToCloseScript()
+        {
+            lock (_lockObject)
+            {
+
+                if (DateTime.Now > _validUntilTime || (_isScriptNeededToRun.HasValue && !_isScriptNeededToRun.Value))
+                {
+                    NotifyContactAboutDecision();
+                    Environment.Exit(1);
+                }
+
+                if (!_isScriptNeededToRun.HasValue)
+                {
+                    return;
+                }
+
+                if (_isAggregatingProcessStarted)
+                {
+                    return;
+                }
+
+                NotifyContactAboutDecision();
+                if (_isScriptNeededToRun.Value)
+                {
+                    _isAggregatingProcessStarted = true;
+                    _timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                    string? message = _aggregate?.Aggregate();
+                    NotifyContact(message!);
+                    Environment.Exit(1);
+                }
+            }
         }
     }
 }
