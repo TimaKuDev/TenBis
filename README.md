@@ -45,7 +45,7 @@ The script currently works in the following browsers:
 
 Follow these steps to set up and configure your project:
 
-1. Create the Executable (EXE) File:
+1. [Create the Executable (EXE) File:](https://www.youtube.com/watch?v=7iVIfkVHKII&t=2s&ab_channel=DarrenDoesEverything)
 - Compile your script into an executable (EXE) file. This step ensures that your application can be easily installed and run on various systems.
 
 2. Install the Application:
