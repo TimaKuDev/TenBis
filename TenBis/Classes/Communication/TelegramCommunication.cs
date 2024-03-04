@@ -120,12 +120,13 @@ namespace TenBis.Classes.Notifiers
 
             _botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions);
             var startTimeSpan = TimeSpan.Zero;
-            var periodTimeSpan = TimeSpan.FromSeconds(10);
+            var periodTimeSpan = TimeSpan.FromSeconds(30);
             _timer = new Timer((_) => CheckIfNeedToCloseScript(), null, startTimeSpan, periodTimeSpan);
         }
 
         private void CheckIfNeedToCloseScript()
         {
+            _logger.Info($"{Helper.GetCurrentMethod()}: checking if need to run the script");
             lock (_lockObject)
             {
 

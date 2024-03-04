@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_711B7245C85D4B258761C00982EAB5AF"
+        "MsmKey" = "8:_AA22833598344065BDA28D364A45B12E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -74,6 +74,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -91,6 +99,16 @@
         {
             "LaunchCondition"
             {
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_2ACEF17C46DE4FC09349623C9015701A"
+                {
+                "Name" = "8:.NET Core"
+                "Message" = "8:[VSDNETCOREMSG]"
+                "AllowLaterVersions" = "11:FALSE"
+                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
+                "IsNETCore" = "11:TRUE"
+                "Architecture" = "2:0"
+                "Runtime" = "2:0"
+                }
             }
         }
         "File"
@@ -671,7 +689,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_711B7245C85D4B258761C00982EAB5AF"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_AA22833598344065BDA28D364A45B12E"
             {
             "SourcePath" = "8:..\\TenBis\\obj\\Release\\net6.0\\apphost.exe"
             "TargetName" = "8:"

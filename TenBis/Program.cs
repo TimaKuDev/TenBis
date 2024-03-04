@@ -1,11 +1,12 @@
-﻿using TenBis.Classes;
+﻿using NLog;
+using TenBis.Classes;
 
 internal static class Program
 {
-
-    private static void Main(string[] args)
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    public static void Main(string[] args)
     {
-        //Tima hide windowH
+        _logger.Info($"Starting {Helper.GetCurrentMethod()}");
         TenBisScript.RunScript();
         Environment.Exit(1);
     }
