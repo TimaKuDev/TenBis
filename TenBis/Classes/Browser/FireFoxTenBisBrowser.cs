@@ -33,7 +33,7 @@ namespace TenBis.Classes.Browser
 
         public void Dispose()
         {
-            _firefoxDriver?.Close();
+            //_firefoxDriver?.Close();
             Task.Delay(1000).Wait();
             _firefoxDriver?.Quit();
             Task.Delay(1000).Wait();

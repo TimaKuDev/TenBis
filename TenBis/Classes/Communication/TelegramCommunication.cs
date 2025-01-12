@@ -119,8 +119,8 @@ namespace TenBis.Classes.Notifiers
             };
 
             _botClient.StartReceiving(UpdateHandler, ErrorHandler, receiverOptions);
-            var startTimeSpan = TimeSpan.Zero;
-            var periodTimeSpan = TimeSpan.FromSeconds(30);
+            TimeSpan startTimeSpan = TimeSpan.Zero;
+            TimeSpan periodTimeSpan = TimeSpan.FromSeconds(10);
             _timer = new Timer((_) => CheckIfNeedToCloseScript(), null, startTimeSpan, periodTimeSpan);
         }
 
