@@ -1,10 +1,12 @@
-﻿namespace TenBis.Interfaces
+﻿using FluentResults;
+
+namespace TenBis.Interfaces
 {
-    internal interface IBrowser: IDisposable
+    internal interface IBrowser
     {
-        public void StartTenBisWebsite();
-        public void IsUserLoggedInValidation();
-        public void AggregateMoneyToPoints();
-        public string GetMessage();
+       Result StartTenBisWebsite();
+       Result IsUserLoggedInValidation();
+       Result AggregateMoneyToPoints();
+       Result<string?> GetMessage();
     }
 }

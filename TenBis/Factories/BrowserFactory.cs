@@ -1,29 +1,27 @@
-﻿using TenBis.Classes.Browser;
-using TenBis.Enums;
+﻿using FluentResults;
+using TenBis.Classes.Browser;
+using TenBis.Enum;
 using TenBis.Interfaces;
+using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Factories
 {
     internal static class BrowserFactory
     {
-        public static IBrowser CreateBrowser(BrowserType browserTypeEnum, string? userProfilePath)
+        internal static Result<IAggregator?> Create(BrowserSettings? browser)
         {
-            if (string.IsNullOrEmpty(userProfilePath)) 
+            if (browser is null)
             {
-                throw new ArgumentNullException();
+                return Result.Fail<IAggregator?>("User profile path is missing or empty.");
             }
 
-            switch (browserTypeEnum)
+            return browser.BrowserType switch
             {
-                case BrowserType.Chrome:
-                    return new ChromeTenBisBrowser(userProfilePath);
-                case BrowserType.Edge:
-                    return new EdgeTenBisBrowser(userProfilePath);
-                case BrowserType.FireFox:
-                    return new FireFoxTenBisBrowser(userProfilePath);
-                default:
-                    throw new ArgumentException($"Invalid  browserType: {browserTypeEnum}");
-            }
+                Browser.Chrome => Result.Ok<IAggregator?>(new ChromeBrowserAggregator(browser)),
+                Browser.Edge => Result.Ok<IAggregator?>(new EdgeBrowserAggregator(browser)),
+                Browser.FireFox => Result.Ok<IAggregator?>(new FireFoxBrowserAggregator(browser)),
+                _ => Result.Fail<IAggregator?>($"Unsupported browser type: {browser.BrowserType}")
+            };
         }
     }
 }

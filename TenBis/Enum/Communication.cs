@@ -1,6 +1,6 @@
-﻿namespace TenBis.Enums
+﻿namespace TenBis.Enum
 {
-    internal enum NotifyType
+    internal enum Communication
     {
         None,
         Email,

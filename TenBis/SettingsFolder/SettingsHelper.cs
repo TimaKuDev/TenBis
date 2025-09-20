@@ -1,33 +1,52 @@
-﻿using Newtonsoft.Json;
-using NLog;
+﻿using FluentResults;
+using Newtonsoft.Json;
 using TenBis.Classes;
+using TenBis.Logging;
 using TenBis.SettingsFolder.Models;
 
 namespace TenBis.SettingsFolder
 {
     internal static class SettingsHelper
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-        public static BrowserSettingsModel? GetBrowserSettings()
+        public static Result<AggregationSettings?> GetAggregationSettings()
         {
-            _logger.Info($"{Helper.GetCurrentMethod()}: Starting getting browser settings");
-            using StreamReader reader = new StreamReader("BrowserSettings.js");
-            string browserSettingsPathJS = reader.ReadToEnd();
-            BrowserSettingsModel? deserializedBrowserSettinsModel = JsonConvert.DeserializeObject<BrowserSettingsModel>(browserSettingsPathJS);
+            try
+            {
+                Logger.FunctionStarted();
 
-            _logger.Info($"{Helper.GetCurrentMethod()}: Finished, getting browser settings");
-            return deserializedBrowserSettinsModel;
+                using StreamReader reader = new(path: "AggregationSettings.js");
+                string aggregationSettingsValue = reader.ReadToEnd();
+                AggregationSettings? aggregationSettings = JsonConvert.DeserializeObject<AggregationSettings>(aggregationSettingsValue);
+
+                Logger.FunctionFinished();
+                Logger.Info($"{Helper.GetCurrentMethod()}: Finished, getting aggregation settings");
+                return Result.Ok(aggregationSettings);
+            }
+            catch (Exception exception)
+            {
+                Logger.Error(exception.Message);
+                return Result.Fail<AggregationSettings?>(exception.Message);
+            }
         }
 
-        public static CommunicationSettingsModel? GetCommunicationSettings()
+        public static Result<CommunicationSettings?> GetCommunicationSettings()
         {
-            _logger.Info($"{Helper.GetCurrentMethod()}: Starting getting communication settings");
-            using StreamReader reader = new StreamReader("CommunicationSettings.js");
-            string communicationSettingsPathJs = reader.ReadToEnd();
-            CommunicationSettingsModel? deserializedChromePathModel = JsonConvert.DeserializeObject<CommunicationSettingsModel>(communicationSettingsPathJs);
+            try
+            {
+                Logger.FunctionStarted();
 
-            _logger.Info($"{Helper.GetCurrentMethod()}: Finished, getting communication settings");
-            return deserializedChromePathModel;
+                using StreamReader reader = new(path: "CommunicationSettings.js");
+                string communicationSettingsValue = reader.ReadToEnd();
+                CommunicationSettings? communicationSettings = JsonConvert.DeserializeObject<CommunicationSettings>(communicationSettingsValue);
+
+                Logger.FunctionFinished();
+                return Result.Ok(communicationSettings);
+            }
+            catch (Exception exception)
+            {
+                Logger.Error(exception.Message);
+                return Result.Fail<CommunicationSettings?>(exception.Message);
+            }
         }
     }
 }

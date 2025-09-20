@@ -1,28 +1,26 @@
-﻿using TenBis.Classes.Notifiers;
-using TenBis.Enums;
+﻿using FluentResults;
+using TenBis.Classes.Notifiers;
+using TenBis.Enum;
 using TenBis.Interfaces;
 using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Factories
 {
-    internal static class NotifierFactory
+    internal static class CommunicationFactory
     {
-        internal static ICommunication? CreateNotifier(CommunicationSettingsModel? notifySettingsModel, IAggregate aggrgate)
+        internal static Result<ICommunicator?> Create(CommunicationSettings? communicationSettings)
         {
-            if (notifySettingsModel == null)
+            if (communicationSettings is null)
             {
-                throw new ArgumentNullException(nameof(notifySettingsModel));
+                return Result.Fail<ICommunicator?>("Communication settings are missing.");
             }
 
-            switch (notifySettingsModel.NotifyType)
+            return communicationSettings.Communication switch
             {
-                case NotifyType.Email:
-                    return new EmailCommunication(notifySettingsModel.NotifyTo, aggrgate);
-                case NotifyType.Telegram:
-                    return new TelegramCommunication(notifySettingsModel.Token, notifySettingsModel.ChatId, aggrgate);
-                default:
-                    return null;
-            }
+                Communication.Email => Result.Ok<ICommunicator?>(new EmailCommunicator(communicationSettings.Email!)),
+                Communication.Telegram => Result.Ok<ICommunicator?>(new TelegramCommunicator(communicationSettings.Telegram!)),
+                _ => Result.Fail<ICommunicator?>($"Unsupported communication type: {communicationSettings.Communication}.")
+            };
         }
     }
 }
