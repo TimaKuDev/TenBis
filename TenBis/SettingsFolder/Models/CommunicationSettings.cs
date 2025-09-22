@@ -9,11 +9,12 @@ namespace TenBis.SettingsFolder.Models
         public Communication Communication { get; set; }
         public EmailSettings? Email { get; set; }
         public TelegramSettings? Telegram { get; set; }
+        public ValidationMessageConfig? ValidationMessageConfig { get; set; }
     }
 
     internal class EmailSettings
     {
-        public string? SmtpServer { get; set; }
+        public string? SMTPServer { get; set; }
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
@@ -24,5 +25,11 @@ namespace TenBis.SettingsFolder.Models
     {
         public string? BotToken { get; set; }
         public long? ChatId { get; set; }
+    }
+
+    public class ValidationMessageConfig
+    {
+        public int? ResponseTimeoutMinutes { get; set; }
+        public int? ResendIntervalMinutes { get; set; }
     }
 }

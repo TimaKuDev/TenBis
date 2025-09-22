@@ -14,7 +14,7 @@ namespace TenBis.Classes.Notifiers
     {
         private readonly EmailSettings m_EmailSettings;
 
-        public EmailCommunicator(EmailSettings? emailSettings)
+        public EmailCommunicator(EmailSettings? emailSettings, ValidationMessageConfig? validationMessageConfig)
         {
             Logger.FunctionStarted();
 
@@ -23,7 +23,7 @@ namespace TenBis.Classes.Notifiers
                 throw new ArgumentNullException(nameof(emailSettings));
             }
 
-            if (string.IsNullOrWhiteSpace(emailSettings.SmtpServer))
+            if (string.IsNullOrWhiteSpace(emailSettings.SMTPServer))
             {
                 throw new ArgumentNullException(nameof(emailSettings));
             }
@@ -43,16 +43,31 @@ namespace TenBis.Classes.Notifiers
                 throw new ArgumentNullException(nameof(emailSettings));
             }
 
+            if (validationMessageConfig is null)
+            {
+                throw new ArgumentNullException(nameof(validationMessageConfig));
+            }
+
+            if (!validationMessageConfig.ResendIntervalMinutes.HasValue)
+            {
+                throw new ArgumentNullException(nameof(validationMessageConfig));
+            }
+
+            if (!validationMessageConfig.ResponseTimeoutMinutes.HasValue)
+            {
+                throw new ArgumentNullException(nameof(validationMessageConfig));
+            }
+
             m_EmailSettings = emailSettings;
 
             Logger.FunctionFinished();
         }
 
-        Task<Result> ICommunicator.SendValidationMessage()
+        Task<Result<bool>> ICommunicator.SendValidationMessage()
         {
             Logger.FunctionStarted();
             Logger.FunctionFinished();
-            return Task.FromResult(Result.Ok());
+            return Task.FromResult(Result.Ok(true));
         }
 
 
@@ -71,7 +86,7 @@ namespace TenBis.Classes.Notifiers
             try
             {
                 using SmtpClient client = new SmtpClient();
-                client.Connect(m_EmailSettings.SmtpServer, m_EmailSettings.Port, useSsl: true);
+                client.Connect(m_EmailSettings.SMTPServer, m_EmailSettings.Port, useSsl: true);
                 client.Authenticate(m_EmailSettings.Username, m_EmailSettings.Password);
                 client.Send(mimeMessage);
             }

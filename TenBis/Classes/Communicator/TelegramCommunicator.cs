@@ -12,32 +12,11 @@ namespace TenBis.Classes.Notifiers
 {
     internal class TelegramCommunicator : ICommunicator
     {
-        private bool _isAggregatingProcessStarted;
         private readonly long m_ChatId;
-        private bool? _isScriptNeededToRun;
-        private readonly IAggregator _aggregate;
         private readonly ITelegramBotClient m_TelegramBotClient;
-        private readonly DateTime _validUntilTime;
-        private static readonly object _lockObject = new object();
-        private Timer? _timer;
-        private TelegramSettings m_TelegramSettings;
+        private readonly ValidationMessageConfig m_ValidationMessageConfig;
 
-        public TelegramCommunicator(string? token, long? chatId, IAggregator aggregate)
-        {
-            if (string.IsNullOrEmpty(token) || !chatId.HasValue || aggregate is null)
-            {
-                throw new Exception();
-            }
-
-            _timer = null;
-            _isAggregatingProcessStarted = false;
-            _validUntilTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 18, 30, 0);
-            m_ChatId = chatId.Value;
-            _aggregate = aggregate;
-            m_TelegramBotClient = new TelegramBotClient(token);
-        }
-
-        public TelegramCommunicator(TelegramSettings telegramSettings)
+        public TelegramCommunicator(TelegramSettings telegramSettings, ValidationMessageConfig? validationMessageConfig)
         {
             Logger.FunctionStarted();
 
@@ -56,9 +35,26 @@ namespace TenBis.Classes.Notifiers
                 throw new ArgumentNullException(nameof(telegramSettings));
             }
 
-            Logger.FunctionFinished();
+            if (validationMessageConfig is null)
+            {
+                throw new ArgumentNullException(nameof(validationMessageConfig));
+            }
+
+            if (validationMessageConfig.ResendIntervalMinutes is null)
+            {
+                throw new ArgumentNullException(nameof(validationMessageConfig));
+            }
+
+            if (validationMessageConfig.ResponseTimeoutMinutes is null)
+            {
+                throw new ArgumentNullException(nameof(validationMessageConfig));
+            }
+
             m_ChatId = telegramSettings.ChatId.Value;
+            m_ValidationMessageConfig = validationMessageConfig;
             m_TelegramBotClient = new TelegramBotClient(telegramSettings!.BotToken);
+
+            Logger.FunctionFinished();
         }
 
 
@@ -78,7 +74,7 @@ namespace TenBis.Classes.Notifiers
             }
         }
 
-        Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             Console.WriteLine($"Error: {exception.Message}");
             return Task.CompletedTask;
@@ -102,13 +98,28 @@ namespace TenBis.Classes.Notifiers
             }
         }
 
-        async Task<Result> ICommunicator.SendValidationMessage()
+        async Task<Result<bool>> ICommunicator.SendValidationMessage()
         {
             Logger.FunctionStarted();
-
             CancellationTokenSource? cancellationTokenSource = null;
+
             try
             {
+                try
+                {
+                    Update[] updates = await m_TelegramBotClient.GetUpdates();
+                    if (updates.Any())
+                    {
+                        int latestUpdateId = updates.Max(u => u.Id);
+                        await m_TelegramBotClient.GetUpdates(offset: latestUpdateId + 1);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn("Failed to flush old updates: " + ex.Message);
+                    return Result.Fail("Failed to flush old updates: " + ex.Message);
+                }
+
                 _userResponseTcs = new TaskCompletionSource<bool>();
 
                 InlineKeyboardMarkup replyMarkup = new(new[]
@@ -120,32 +131,8 @@ namespace TenBis.Classes.Notifiers
                     }
                 });
 
-                // Flush old updates before starting receiving
-                try
-                {
-                    var updates = await m_TelegramBotClient.GetUpdates();
-                    if (updates.Any())
-                    {
-                        var latestUpdateId = updates.Max(u => u.Id);
-                        // This will clear all updates up to the latest one
-                        await m_TelegramBotClient.GetUpdates(offset: latestUpdateId + 1);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn("Failed to flush old updates: " + ex.Message);
-                }
-
-                cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromHours(4));
+                cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(m_ValidationMessageConfig!.ResponseTimeoutMinutes!.Value));
                 CancellationToken cancellationToken = cancellationTokenSource.Token;
-
-                Logger.Info("Sending validation message to user...");
-                await m_TelegramBotClient.SendMessage(
-                    chatId: m_ChatId,
-                    text: "Would you like to aggregate your money to points?",
-                    replyMarkup: replyMarkup,
-                    cancellationToken: cancellationToken
-                );
 
                 Logger.Info("Starting to receive updates from Telegram...");
                 m_TelegramBotClient.StartReceiving(
@@ -158,24 +145,33 @@ namespace TenBis.Classes.Notifiers
                     cancellationToken: cancellationToken
                 );
 
-                Task timeoutTask = Task.Delay(TimeSpan.FromSeconds(4), cancellationToken);
-                Task completedTask = await Task.WhenAny(_userResponseTcs.Task, timeoutTask);
-
-                cancellationTokenSource.Cancel();
-
-                if (completedTask == _userResponseTcs.Task)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    bool userChoice = await _userResponseTcs.Task;
-                    Logger.Info($"User responded with: {(userChoice ? "Yes" : "No")}");
-                    Logger.FunctionFinished();
-                    return Result.Ok().WithSuccess($"User chose {(userChoice ? "Yes" : "No")}");
+                    Logger.Info("Sending validation message to user...");
+                    await m_TelegramBotClient.SendMessage(
+                        chatId: m_ChatId,
+                        text: "Would you like to aggregate your money to points?",
+                        replyMarkup: replyMarkup,
+                        cancellationToken: cancellationToken
+                    );
+
+                    Task timeoutTask = Task.Delay(TimeSpan.FromMinutes(m_ValidationMessageConfig!.ResendIntervalMinutes!.Value), cancellationToken);
+                    Task completedTask = await Task.WhenAny(_userResponseTcs.Task, timeoutTask);
+
+                    if (completedTask == _userResponseTcs.Task)
+                    {
+                        bool userChoice = await _userResponseTcs.Task;
+                        Logger.Info($"User responded with: {(userChoice ? "Yes" : "No")}");
+                        Logger.FunctionFinished();
+                        return Result.Ok(userChoice);
+                    }
+
+                    Logger.Info($"No response received, will retry in {m_ValidationMessageConfig!.ResendIntervalMinutes!.Value} minutes if within timeout period");
                 }
-                else
-                {
-                    Logger.Warn("User did not respond within the 4-hour timeout period");
-                    Logger.FunctionFinished();
-                    return Result.Fail("No response received within timeout.");
-                }
+
+                Logger.Warn("User did not respond within the 4-hour timeout period");
+                Logger.FunctionFinished();
+                return Result.Fail("No response received within timeout.");
             }
             catch (Exception ex)
             {

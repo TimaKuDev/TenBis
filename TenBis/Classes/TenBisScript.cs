@@ -30,15 +30,27 @@ namespace TenBis.Classes
                     return ExitCode.CommunicationFactoryFailure;
                 }
 
-                communicator = communcationResult.Value!;   
+                communicator = communcationResult.Value!;
 
-                Result taskValidateResult = await communicator.SendValidationMessage();
+                Result<bool> taskValidateResult = await communicator.SendValidationMessage();
                 if (taskValidateResult.IsFailed)
                 {
                     string errors = string.Join(Environment.NewLine, taskValidateResult.Errors);
                     Result sendMessageResult = await communicator.SendMessage(errors);
 
                     return ExitCode.CommunicationFailure;
+                }
+
+                bool isValidationValid = taskValidateResult.Value;
+                if (!isValidationValid)
+                {
+                    Result sendMessageResult = await communicator.SendMessage("Choosed not to aggregate money");
+                    if (sendMessageResult.IsFailed)
+                    {
+                        return ExitCode.CommunicationFailure;
+                    }
+
+                    return ExitCode.UserCancelled;
                 }
 
                 Result<AggregationSettings?> aggregationSettingsResult = SettingsHelper.GetAggregationSettings();
@@ -72,7 +84,7 @@ namespace TenBis.Classes
                 string message = aggregatorResult.Value;
                 await communicator.SendMessage(message);
 
-                Logger.FunctionFinished();          
+                Logger.FunctionFinished();
                 return ExitCode.Success;
             }
             catch (Exception exception)
