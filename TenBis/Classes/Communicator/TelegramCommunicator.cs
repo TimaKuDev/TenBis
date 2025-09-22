@@ -16,7 +16,7 @@ namespace TenBis.Classes.Notifiers
         private readonly ITelegramBotClient m_TelegramBotClient;
         private readonly ValidationMessageConfig m_ValidationMessageConfig;
 
-        public TelegramCommunicator(TelegramSettings telegramSettings, ValidationMessageConfig? validationMessageConfig)
+        public TelegramCommunicator(TelegramSettings ?telegramSettings, ValidationMessageConfig? validationMessageConfig)
         {
             Logger.FunctionStarted();
 

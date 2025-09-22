@@ -18,7 +18,7 @@ namespace TenBis.Factories
             return communicationSettings.Communication switch
             {
                 Communication.Email => Result.Ok<ICommunicator?>(new EmailCommunicator(communicationSettings.Email, communicationSettings.ValidationMessageConfig)),
-                Communication.Telegram => Result.Ok<ICommunicator?>(new TelegramCommunicator(communicationSettings.Telegram, communicationSettings.ValidationMessageConfig)),
+                Communication.Telegram => Result.Ok<ICommunicator?>(new TelegramCommunicator(communicationSettings?.Telegram, communicationSettings?.ValidationMessageConfig)),
                 _ => Result.Fail<ICommunicator?>($"Unsupported communication type: {communicationSettings.Communication}.")
             };
         }
