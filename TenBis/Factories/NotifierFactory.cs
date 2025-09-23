@@ -1,5 +1,5 @@
 ﻿using FluentResults;
-using TenBis.Classes.Notifiers;
+using TenBis.Classes.Communicator;
 using TenBis.Enum;
 using TenBis.Interfaces;
 using TenBis.SettingsFolder.Models;

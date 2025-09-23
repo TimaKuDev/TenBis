@@ -4,7 +4,7 @@ using TenBis.Interfaces;
 using TenBis.Logging;
 using TenBis.SettingsFolder.Models;
 
-namespace TenBis.Classes.Browser
+namespace TenBis.Classes.Aggregators
 {
     internal class FireFoxBrowserAggregator : BrowserAggregator, IAggregator
     {

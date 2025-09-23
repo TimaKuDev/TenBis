@@ -7,7 +7,7 @@ namespace TenBis.Classes.Aggregators
 {
     internal class ApiTenBisAggregator : IAggregator
     {
-        private ApiSettings? m_Api;
+        private readonly ApiSettings? m_Api;
 
         public ApiTenBisAggregator(ApiSettings? api)
         {

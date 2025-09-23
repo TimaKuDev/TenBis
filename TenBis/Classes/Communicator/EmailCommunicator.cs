@@ -3,12 +3,11 @@ using GeneralUtils;
 using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
-using System;
 using TenBis.Interfaces;
 using TenBis.Logging;
 using TenBis.SettingsFolder.Models;
 
-namespace TenBis.Classes.Notifiers
+namespace TenBis.Classes.Communicator
 {
     internal class EmailCommunicator : ICommunicator
     {
@@ -75,17 +74,18 @@ namespace TenBis.Classes.Notifiers
         {
             Logger.FunctionStarted();
 
-            MimeMessage mimeMessage = new MimeMessage
+            TextPart textPart = new(TextFormat.Text) { Text = message };
+            MimeMessage mimeMessage = new()
             {
                 Subject = "Ten Bis",
-                Body = new TextPart(TextFormat.Text) { Text = message }
+                Body = textPart
             };
             mimeMessage.From.Add(new MailboxAddress("Ten Bis Notifier", EmailInformation.Address));
             mimeMessage.To.Add(MailboxAddress.Parse(m_EmailSettings.RecipientEmail));
 
             try
             {
-                using SmtpClient client = new SmtpClient();
+                using SmtpClient client = new();
                 client.Connect(m_EmailSettings.SMTPServer, m_EmailSettings.Port, useSsl: true);
                 client.Authenticate(m_EmailSettings.Username, m_EmailSettings.Password);
                 client.Send(mimeMessage);
@@ -93,11 +93,11 @@ namespace TenBis.Classes.Notifiers
             catch (Exception exception)
             {
                 Logger.Error(exception.Message);
-                return Task<Result>.FromResult(Result.Fail("Failed to send email").WithError(exception.Message));
+                return Task.FromResult(Result.Fail("Failed to send email").WithError(exception.Message));
             }
 
             Logger.FunctionFinished();
-            return Task<Result>.FromResult(Result.Ok());
+            return Task.FromResult(Result.Ok());
         }
     }
 }

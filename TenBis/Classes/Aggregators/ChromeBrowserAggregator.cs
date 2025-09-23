@@ -3,7 +3,7 @@ using OpenQA.Selenium.Chrome;
 using TenBis.Interfaces;
 using TenBis.Logging;
 
-namespace TenBis.Classes.Browser
+namespace TenBis.Classes.Aggregators
 {
     internal class ChromeBrowserAggregator : BrowserAggregator, IAggregator
     {

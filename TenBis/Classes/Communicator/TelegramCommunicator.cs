@@ -8,7 +8,7 @@ using TenBis.Interfaces;
 using TenBis.Logging;
 using TenBis.SettingsFolder.Models;
 
-namespace TenBis.Classes.Notifiers
+namespace TenBis.Classes.Communicator
 {
     internal class TelegramCommunicator : ICommunicator
     {
@@ -76,7 +76,7 @@ namespace TenBis.Classes.Notifiers
 
         private static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Error: {exception.Message}");
+            Logger.Error($"Telegram Bot Error: {exception.Message}");
             return Task.CompletedTask;
         }
 

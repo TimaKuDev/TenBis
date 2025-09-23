@@ -1,5 +1,5 @@
 ﻿using FluentResults;
-using TenBis.Classes.Browser;
+using TenBis.Classes.Aggregators;
 using TenBis.Enum;
 using TenBis.Interfaces;
 using TenBis.SettingsFolder.Models;

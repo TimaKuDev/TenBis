@@ -3,7 +3,7 @@ using OpenQA.Selenium.Edge;
 using TenBis.Interfaces;
 using TenBis.Logging;
 
-namespace TenBis.Classes.Browser
+namespace TenBis.Classes.Aggregators
 {
     internal class EdgeBrowserAggregator : BrowserAggregator, IAggregator
     {

@@ -3,7 +3,7 @@ using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using TenBis.Logging;
 
-namespace TenBis.Classes.Browser
+namespace TenBis.Classes.Aggregators
 {
     internal abstract class BrowserAggregator
     {

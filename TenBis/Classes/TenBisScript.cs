@@ -89,7 +89,11 @@ namespace TenBis.Classes
             }
             catch (Exception exception)
             {
-                await communicator?.SendMessage("There was an error while trying to run the script, check the logs files.");
+                if (communicator is not null)
+                {
+                    await communicator.SendMessage("There was an error while trying to run the script, check the logs files.");
+                }
+
                 Logger.Error(exception.Message);
                 return ExitCode.GenericError;
             }
