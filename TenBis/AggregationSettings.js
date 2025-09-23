@@ -6,8 +6,8 @@
       "UserProfilePath": "C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data\\Default"
     },
     "Api": {
-      "BaseUrl": "https://api.example.com",
-      "ApiKey": "your-api-key-here",
+      "BaseUrl": "https://www.10bis.co.il/",
+      "cookie": "your-api-key-here",
       "TimeoutSeconds": 30
     }
   }
