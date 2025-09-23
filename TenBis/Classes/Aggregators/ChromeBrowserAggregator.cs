@@ -27,18 +27,18 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionFinished();
         }
 
-        public Result<string> Aggregate()
+        Task<Result<string>> IAggregator.Aggregate()
         {
             Logger.FunctionStarted();
 
             Result<string> aggregateResult = Aggregate(m_ChromeDriver);
             if (aggregateResult.IsFailed)
             {
-                return aggregateResult;
+                return Task.FromResult(aggregateResult);
             }
 
             Logger.FunctionFinished();
-            return Result.Ok(aggregateResult.Value);
+            return Task.FromResult(Result.Ok(aggregateResult.Value));
         }
     }
 }

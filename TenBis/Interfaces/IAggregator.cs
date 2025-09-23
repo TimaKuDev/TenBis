@@ -4,6 +4,6 @@ namespace TenBis.Interfaces
 {
     internal interface IAggregator
     {
-        Result<string> Aggregate();
+        Task<Result<string>> Aggregate();
     }
 }

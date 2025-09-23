@@ -6,22 +6,22 @@ namespace TenBis.SettingsFolder.Models
     internal class AggregationSettings
     {
         [JsonConverter(typeof(Aggregation))]
-        internal Aggregation Aggregation { get; set; }
-        internal BrowserSettings? Browser { get; set; }
-        internal ApiSettings? Api { get; set; }
+        public Aggregation Aggregation { get; set; }
+        public BrowserSettings? Browser { get; set; }
+        public ApiSettings? Api { get; set; }
     }
 
     internal class BrowserSettings
     {
         [JsonConverter(typeof(Browser))]
-        internal Browser BrowserType { get; set; }
-        internal string? UserProfilePath { get; set; }
+        public Browser BrowserType { get; set; }
+        public string? UserProfilePath { get; set; }
     }
 
     internal class ApiSettings
     {
-        internal string? BaseUrl { get; set; }
-        internal string? ApiKey { get; set; }
-        internal int TimeoutSeconds { get; set; }
+        public string? BaseUrl { get; set; }
+        public string? Cookie { get; set; }
+        public int? TimeoutSeconds { get; set; }
     }
 }

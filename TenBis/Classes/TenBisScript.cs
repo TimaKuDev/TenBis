@@ -68,7 +68,7 @@ namespace TenBis.Classes
 
                 IAggregator aggregator = aggregateResult.Value!;
 
-                Result<string> aggregatorResult = aggregator.Aggregate();
+                Result<string> aggregatorResult = await aggregator.Aggregate();
                 if (aggregatorResult.IsFailed)
                 {
                     string errors = string.Join(Environment.NewLine, aggregatorResult.Errors);

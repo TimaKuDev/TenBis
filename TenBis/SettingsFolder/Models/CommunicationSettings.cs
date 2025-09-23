@@ -22,7 +22,7 @@ namespace TenBis.SettingsFolder.Models
     }
 
     internal class TelegramSettings
-    {
+    {   
         public string? BotToken { get; set; }
         public long? ChatId { get; set; }
     }

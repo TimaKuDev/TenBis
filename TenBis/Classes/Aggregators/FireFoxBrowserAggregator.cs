@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using TenBis.Interfaces;
 using TenBis.Logging;
@@ -26,18 +27,18 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionFinished();
         }
 
-        public Result<string> Aggregate()
+        Task<Result<string>> IAggregator.Aggregate()
         {
             Logger.FunctionStarted();
 
             Result<string> aggregateResult = Aggregate(m_FirefoxDriver);
             if (aggregateResult.IsFailed)
             {
-                return aggregateResult;
+                return Task.FromResult(aggregateResult);
             }
 
             Logger.FunctionFinished();
-            return Result.Ok(aggregateResult.Value);
+            return Task.FromResult(Result.Ok(aggregateResult.Value));
         }
     }
 }

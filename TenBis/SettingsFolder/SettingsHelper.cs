@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using TenBis.Classes;
 using TenBis.Logging;
 using TenBis.SettingsFolder.Models;
@@ -16,7 +17,7 @@ namespace TenBis.SettingsFolder
 
                 using StreamReader reader = new(path: "AggregationSettings.js");
                 string aggregationSettingsValue = reader.ReadToEnd();
-                AggregationSettings? aggregationSettings = JsonConvert.DeserializeObject<AggregationSettings>(aggregationSettingsValue);
+                AggregationSettings? aggregationSettings = JsonConvert.DeserializeObject<AggregationSettings?>(aggregationSettingsValue);
 
                 Logger.FunctionFinished();
                 Logger.Info($"{Helper.GetCurrentMethod()}: Finished, getting aggregation settings");
@@ -37,7 +38,7 @@ namespace TenBis.SettingsFolder
 
                 using StreamReader reader = new(path: "CommunicationSettings.js");
                 string communicationSettingsValue = reader.ReadToEnd();
-                CommunicationSettings? communicationSettings = JsonConvert.DeserializeObject<CommunicationSettings>(communicationSettingsValue);
+                CommunicationSettings? communicationSettings = JsonConvert.DeserializeObject<CommunicationSettings?>(communicationSettingsValue);
 
                 Logger.FunctionFinished();
                 return Result.Ok(communicationSettings);
