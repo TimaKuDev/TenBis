@@ -1,27 +1,25 @@
 ﻿using FluentResults;
-using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using TenBis.Interfaces;
 using TenBis.Logging;
+using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Classes.Aggregators
 {
     internal class EdgeBrowserAggregator : BrowserAggregator, IAggregator
     {
-        private readonly EdgeDriverService m_EdgeDriverService;
-        private readonly EdgeOptions m_EdgeOptions;
-        private readonly EdgeDriver m_EdgeDriver;
-
-        public EdgeBrowserAggregator(SettingsFolder.Models.BrowserSettings browserSettings)
+        public EdgeBrowserAggregator(BrowserSettings browserSettings)
         {
             Logger.FunctionStarted();
 
-            m_EdgeDriverService = EdgeDriverService.CreateDefaultService();
+            EdgeDriverService edgeDriverService = EdgeDriverService.CreateDefaultService();
 
-            m_EdgeOptions = new EdgeOptions();
-            m_EdgeOptions.AddArgument($"{UserDataDirPrefix}{browserSettings.UserProfilePath}");
+            EdgeOptions edgeOptions = new();
+            edgeOptions.AddArgument($"{UserDataDirPrefix}{browserSettings.UserProfilePath}");
 
-            m_EdgeDriver = new EdgeDriver(m_EdgeDriverService, m_EdgeOptions);
+            EdgeDriver edgeDriver = new(edgeDriverService, edgeOptions);
+
+            m_WebDriver = edgeDriver;
 
             Logger.FunctionStarted();
         }
@@ -30,7 +28,7 @@ namespace TenBis.Classes.Aggregators
         {
             Logger.FunctionStarted();
 
-            Result<string> aggregateResult = Aggregate(m_EdgeDriver);
+            Result<string> aggregateResult = Aggregate();
             if (aggregateResult.IsFailed)
             {
                 return Task.FromResult(aggregateResult);

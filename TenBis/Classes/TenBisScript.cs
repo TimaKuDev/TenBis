@@ -44,7 +44,7 @@ namespace TenBis.Classes
                 bool isValidationValid = taskValidateResult.Value;
                 if (!isValidationValid)
                 {
-                    Result sendMessageResult = await communicator.SendMessage("Choosed not to aggregate money");
+                    Result sendMessageResult = await communicator.SendMessage("Chose not to aggregate money");
                     if (sendMessageResult.IsFailed)
                     {
                         return ExitCode.CommunicationFailure;

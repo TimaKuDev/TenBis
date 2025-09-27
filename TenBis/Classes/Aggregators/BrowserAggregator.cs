@@ -9,13 +9,14 @@ namespace TenBis.Classes.Aggregators
     {
         protected const string UserDataDirPrefix = "--user-data-dir=";
         protected const string TenBisUrl = "https://www.10bis.co.il/next/user-report?dateBias=0";
-        private const string DropDownImageElement = @"//img[@class=""styled__Img-sc-1f9rnwm-0 bDSlBz ActionMenu__MenuTriangleButton-sc-15ye1k-1 kwtrcZ""]";
-        private const string LoadCardButtonElement = @"//button[@class=""Button-sc-1n9hyby-0 AddToCredit__AddCreditButton-sc-1ux4vzy-3 fQLuJl kipuFE""]";
+        private const string DropDownImageElement = @"//div[@class=""OpenMenuContent-dfTXpZ fHZBl""]";
+        private const string LoadCardButtonElement = @"//button[@class=""Button-dtEEMF AddCreditButton-bFDXtp iXOfjm zjGbl""]";
         private const string ContinueButtonElement = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
         private const string ChargeCardButtonElement = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
-        private const string CurrentBalanceSpanElement = "PrepaidCard__Balance-sc-1yb9170-4";
+        private const string CurrentBalanceSpanElement = @"//span[@class=""Balance-gcvUbW ewtkSs""]";
+        protected WebDriver? m_WebDriver;
 
-        private static Result IsUserLoggedIn(WebDriver webDriver)
+        private Result IsUserLoggedIn()
         {
             try
             {
@@ -23,14 +24,14 @@ namespace TenBis.Classes.Aggregators
                 Task.Delay(2000);
 
                 int triesAmount = 0;
-                ReadOnlyCollection<IWebElement> dropDownImage = webDriver.FindElements(By.XPath(DropDownImageElement));
-                bool userLoggedIn = dropDownImage.Count != 0;
+                ReadOnlyCollection<IWebElement>? dropDownImage = m_WebDriver?.FindElements(By.XPath(DropDownImageElement));
+                bool userLoggedIn = dropDownImage?.Count != 0;
                 while (triesAmount < 3 && !userLoggedIn)
                 {
                     Task.Delay(28000).Wait();
 
-                    dropDownImage = webDriver.FindElements(By.XPath(DropDownImageElement));
-                    userLoggedIn = dropDownImage.Count != 0;
+                    dropDownImage = m_WebDriver?.FindElements(By.XPath(DropDownImageElement));
+                    userLoggedIn = dropDownImage?.Count != 0;
                     triesAmount++;
                 }
 
@@ -44,12 +45,12 @@ namespace TenBis.Classes.Aggregators
             }
         }
 
-        private static Result ClickingOnAggregateButton(WebDriver webDriver)
+        private Result ClickingOnAggregateButton()
         {
             Logger.FunctionStarted();
             Task.Delay(millisecondsDelay: 1000);
 
-            ReadOnlyCollection<IWebElement>? aggregateButton = webDriver.FindElements(By.XPath(LoadCardButtonElement));
+            ReadOnlyCollection<IWebElement>? aggregateButton = m_WebDriver?.FindElements(By.XPath(LoadCardButtonElement));
             bool? isAggregateButtonEnabled = aggregateButton?[0].Enabled;
             if (!isAggregateButtonEnabled.HasValue || !isAggregateButtonEnabled.Value)
             {
@@ -63,12 +64,12 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        private static Result ClickingOnContinueButton(WebDriver webDriver)
+        private Result ClickingOnContinueButton()
         {
             Logger.FunctionStarted();
             Task.Delay(millisecondsDelay: 1000);
 
-            ReadOnlyCollection<IWebElement>? continueButton = webDriver.FindElements(By.XPath(ContinueButtonElement));
+            ReadOnlyCollection<IWebElement>? continueButton = m_WebDriver?.FindElements(By.XPath(ContinueButtonElement));
             bool? isContinueButtonEnabled = continueButton?[0].Enabled;
             if (!isContinueButtonEnabled.HasValue || !isContinueButtonEnabled.Value)
             {
@@ -83,12 +84,12 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        private static Result ClickingOnChargeButton(WebDriver webDriver)
+        private Result ClickingOnChargeButton()
         {
             Logger.FunctionStarted();
             Task.Delay(1000);
 
-            ReadOnlyCollection<IWebElement>? chargeCardButton = webDriver.FindElements(By.XPath(ChargeCardButtonElement));
+            ReadOnlyCollection<IWebElement>? chargeCardButton = m_WebDriver?.FindElements(By.XPath(ChargeCardButtonElement));
             bool? isChargeCardButtonEnabled = chargeCardButton?[0].Enabled;
             if (!isChargeCardButtonEnabled.HasValue || !isChargeCardButtonEnabled.Value)
             {
@@ -102,30 +103,30 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        protected static Result<string> Aggregate(WebDriver webDriver)
+        protected Result<string> Aggregate()
         {
             try
             {
                 Logger.FunctionStarted();
-                Result startTenBisWebsiteResult = StartTenBisWebsite(webDriver);
+                Result startTenBisWebsiteResult = StartTenBisWebsite();
                 if (startTenBisWebsiteResult.IsFailed)
                 {
                     return startTenBisWebsiteResult;
                 }
 
-                Result isUserLoggedInResult = IsUserLoggedIn(webDriver);
+                Result isUserLoggedInResult = IsUserLoggedIn();
                 if (isUserLoggedInResult.IsFailed)
                 {
                     return isUserLoggedInResult;
                 }
 
-                Result aggregateMoneyToPointsResult = AggregateMoneyToPoints(webDriver);
+                Result aggregateMoneyToPointsResult = AggregateMoneyToPoints();
                 if (aggregateMoneyToPointsResult.IsFailed)
                 {
                     return aggregateMoneyToPointsResult;
                 }
 
-                Result<string> currentBalanceResult = GetCurrentBalance(webDriver);
+                Result<string> currentBalanceResult = GetCurrentBalance();
                 if (currentBalanceResult.IsFailed)
                 {
                     return currentBalanceResult;
@@ -143,12 +144,17 @@ namespace TenBis.Classes.Aggregators
             }
         }
 
-        private static Result<string> GetCurrentBalance(WebDriver webDriver)
+        private Result<string> GetCurrentBalance()
         {
             Logger.FunctionStarted();
             Task.Delay(1000);
 
-            ReadOnlyCollection<IWebElement>? currentBalanceSpan = webDriver.FindElements(By.XPath(CurrentBalanceSpanElement));
+            ReadOnlyCollection<IWebElement>? currentBalanceSpan = m_WebDriver?.FindElements(By.XPath(CurrentBalanceSpanElement));
+            if (currentBalanceSpan is null)
+            {
+                Logger.Error("Failed to retrieve the current balance span.");
+                return Result.Fail("Failed to retrieve the current balance span.");
+            }
 
             string? currentBalance = currentBalanceSpan[0].Text;
             if (string.IsNullOrWhiteSpace(currentBalance))
@@ -161,24 +167,24 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok(currentBalance);
         }
 
-        private static Result AggregateMoneyToPoints(WebDriver webDriver)
+        private Result AggregateMoneyToPoints()
         {
             Logger.Info($"Initiating the process of money aggregation");
 
 
-            Result clickingOnAggregateButtonResult = ClickingOnAggregateButton(webDriver);
+            Result clickingOnAggregateButtonResult = ClickingOnAggregateButton();
             if (clickingOnAggregateButtonResult.IsFailed)
             {
                 return clickingOnAggregateButtonResult;
             }
 
-            Result clickingOnContinueButtonResult = ClickingOnContinueButton(webDriver);
+            Result clickingOnContinueButtonResult = ClickingOnContinueButton(); //Tima
             if (clickingOnAggregateButtonResult.IsFailed)
             {
                 return clickingOnContinueButtonResult;
             }
 
-            Result clickingOnChargeButtonResult = ClickingOnChargeButton(webDriver);
+            Result clickingOnChargeButtonResult = ClickingOnChargeButton(); //Tima
             if (clickingOnChargeButtonResult.IsFailed)
             {
                 return clickingOnChargeButtonResult;
@@ -189,14 +195,14 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        private static Result StartTenBisWebsite(WebDriver webDriver)
+        private Result StartTenBisWebsite()
         {
             try
             {
                 Logger.FunctionStarted();
 
-                webDriver.Manage().Window.Maximize();
-                webDriver.Navigate().GoToUrl(TenBisUrl);
+                m_WebDriver?.Manage().Window.Maximize();
+                m_WebDriver?.Navigate().GoToUrl(TenBisUrl);
 
                 Logger.FunctionFinished();
                 return Result.Ok();

@@ -2,27 +2,24 @@
 using OpenQA.Selenium.Chrome;
 using TenBis.Interfaces;
 using TenBis.Logging;
+using TenBis.SettingsFolder.Models;
 
 namespace TenBis.Classes.Aggregators
 {
     internal class ChromeBrowserAggregator : BrowserAggregator, IAggregator
     {
-
-        private readonly ChromeDriverService m_ChromeDriverService;
-        private readonly ChromeOptions m_ChromeOptions;
-        private readonly ChromeDriver m_ChromeDriver;
-
-        public ChromeBrowserAggregator(SettingsFolder.Models.BrowserSettings browserSettings)
+        public ChromeBrowserAggregator(BrowserSettings browserSettings)
         {
             Logger.FunctionStarted();
 
+            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService();
 
-            m_ChromeDriverService = ChromeDriverService.CreateDefaultService();
-            m_ChromeOptions = new ChromeOptions();
+            ChromeOptions chromeOptions = new();
+            chromeOptions.AddArgument($"{UserDataDirPrefix}{browserSettings.UserProfilePath}");
 
-            m_ChromeOptions.AddArgument($"{UserDataDirPrefix}{browserSettings.UserProfilePath}");
+            ChromeDriver chromeDriver = new(chromeDriverService, chromeOptions);
 
-            m_ChromeDriver = new ChromeDriver(m_ChromeDriverService, m_ChromeOptions);
+            m_WebDriver = chromeDriver;
 
             Logger.FunctionFinished();
         }
@@ -31,14 +28,15 @@ namespace TenBis.Classes.Aggregators
         {
             Logger.FunctionStarted();
 
-            Result<string> aggregateResult = Aggregate(m_ChromeDriver);
+            Result<string> aggregateResult = Aggregate();
             if (aggregateResult.IsFailed)
             {
                 return Task.FromResult(aggregateResult);
             }
 
             Logger.FunctionFinished();
-            return Task.FromResult(Result.Ok(aggregateResult.Value));
+            string message = $"Aggregation completed successfully, aggregated amount: {aggregateResult.Value}";
+            return Task.FromResult(Result.Ok(message));
         }
     }
 }
