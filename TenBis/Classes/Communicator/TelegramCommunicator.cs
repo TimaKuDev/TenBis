@@ -58,7 +58,7 @@ namespace TenBis.Classes.Communicator
         }
 
 
-        private TaskCompletionSource<bool>? _userResponseTcs;
+        private TaskCompletionSource<bool>? m_UserResponseTcs;
 
 
         private async Task ReceiveUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -67,10 +67,10 @@ namespace TenBis.Classes.Communicator
                 update.CallbackQuery?.Message?.Chat.Id == m_ChatId &&
                 bool.TryParse(update.CallbackQuery.Data, out bool response))
             {
-                _userResponseTcs?.TrySetResult(response);
+                m_UserResponseTcs?.TrySetResult(response);
 
                 await botClient.AnswerCallbackQuery(update.CallbackQuery.Id, cancellationToken: cancellationToken);
-                await botClient.SendMessage(m_ChatId, $"You selected: {(response ? "Yes" : "No")}", cancellationToken: cancellationToken);
+                //await botClient.SendMessage(m_ChatId, $"You selected: {(response ? "Yes" : "No")}", cancellationToken: cancellationToken);
             }
         }
 
@@ -120,7 +120,7 @@ namespace TenBis.Classes.Communicator
                     return Result.Fail("Failed to flush old updates: " + ex.Message);
                 }
 
-                _userResponseTcs = new TaskCompletionSource<bool>();
+                m_UserResponseTcs = new TaskCompletionSource<bool>();
 
                 InlineKeyboardMarkup replyMarkup = new(new[]
                 {
@@ -156,11 +156,11 @@ namespace TenBis.Classes.Communicator
                     );
 
                     Task timeoutTask = Task.Delay(TimeSpan.FromMinutes(m_ValidationMessageConfig!.ResendIntervalMinutes!.Value), cancellationToken);
-                    Task completedTask = await Task.WhenAny(_userResponseTcs.Task, timeoutTask);
+                    Task completedTask = await Task.WhenAny(m_UserResponseTcs.Task, timeoutTask);
 
-                    if (completedTask == _userResponseTcs.Task)
+                    if (completedTask == m_UserResponseTcs.Task)
                     {
-                        bool userChoice = await _userResponseTcs.Task;
+                        bool userChoice = await m_UserResponseTcs.Task;
                         Logger.Info($"User responded with: {(userChoice ? "Yes" : "No")}");
                         Logger.FunctionFinished();
                         return Result.Ok(userChoice);
@@ -180,7 +180,7 @@ namespace TenBis.Classes.Communicator
             }
             finally
             {
-                _userResponseTcs = null;
+                m_UserResponseTcs = null;
                 cancellationTokenSource?.Dispose();
             }
         }

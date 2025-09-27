@@ -142,6 +142,12 @@ namespace TenBis.Classes.Aggregators
                 Logger.Error(exception.Message);
                 return new Result<string>().WithError(exception.Message);
             }
+            finally
+            {
+                m_WebDriver?.Quit();
+                m_WebDriver?.Dispose();
+                Logger.Info("The browser has been closed and resources have been released.");
+            }
         }
 
         private Result<string> GetCurrentBalance()
