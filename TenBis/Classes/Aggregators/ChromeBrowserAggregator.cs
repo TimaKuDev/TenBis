@@ -35,8 +35,7 @@ namespace TenBis.Classes.Aggregators
             }
 
             Logger.FunctionFinished();
-            string message = $"Aggregation completed successfully, aggregated amount: {aggregateResult.Value}";
-            return Task.FromResult(Result.Ok(message));
+            return Task.FromResult(Result.Ok(aggregateResult.Value));
         }
     }
 }

@@ -11,9 +11,11 @@ namespace TenBis.Classes.Aggregators
         protected const string TenBisUrl = "https://www.10bis.co.il/next/user-report?dateBias=0";
         private const string DropDownImageElement = @"//div[@class=""OpenMenuContent-dfTXpZ fHZBl""]";
         private const string LoadCardButtonElement = @"//button[@class=""Button-dtEEMF AddCreditButton-bFDXtp iXOfjm zjGbl""]";
-        private const string ContinueButtonElement = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
-        private const string ChargeCardButtonElement = @"//button[@class=""Button-sc-1n9hyby-0 Styled__SubmitButton-sc-182pt85-0 fQLuJl dqfjan""]";
+        private const string AmountElement = @"//div[@class=""Amount-ebPevQ dCjGSF""]";
+        private const string ContinueButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
+        private const string ChargeCardButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
         private const string CurrentBalanceSpanElement = @"//span[@class=""Balance-gcvUbW ewtkSs""]";
+        private const string CloseButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
         protected WebDriver? m_WebDriver;
 
         private Result IsUserLoggedIn()
@@ -120,7 +122,7 @@ namespace TenBis.Classes.Aggregators
                     return isUserLoggedInResult;
                 }
 
-                Result aggregateMoneyToPointsResult = AggregateMoneyToPoints();
+                Result<string> aggregateMoneyToPointsResult = AggregateMoneyToPoints();
                 if (aggregateMoneyToPointsResult.IsFailed)
                 {
                     return aggregateMoneyToPointsResult;
@@ -132,9 +134,10 @@ namespace TenBis.Classes.Aggregators
                     return currentBalanceResult;
                 }
 
+                string message = $"Aggregation completed successfully added: {aggregateMoneyToPointsResult.Value}, the current balance is: {currentBalanceResult.Value}";
 
                 Logger.FunctionFinished();
-                return Result.Ok(currentBalanceResult.Value);
+                return Result.Ok(message);
 
             }
             catch (Exception exception)
@@ -173,7 +176,7 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok(currentBalance);
         }
 
-        private Result AggregateMoneyToPoints()
+        private Result<string> AggregateMoneyToPoints()
         {
             Logger.Info($"Initiating the process of money aggregation");
 
@@ -184,21 +187,75 @@ namespace TenBis.Classes.Aggregators
                 return clickingOnAggregateButtonResult;
             }
 
-            Result clickingOnContinueButtonResult = ClickingOnContinueButton(); //Tima
+            Result clickingOnContinueButtonResult = ClickingOnContinueButton();
             if (clickingOnAggregateButtonResult.IsFailed)
             {
                 return clickingOnContinueButtonResult;
             }
 
-            Result clickingOnChargeButtonResult = ClickingOnChargeButton(); //Tima
+            Result<string> inputAnmountResult = InputAnmount();
+            if (inputAnmountResult.IsFailed)
+            {
+                return inputAnmountResult;
+            }
+
+            Result clickingOnChargeButtonResult = ClickingOnChargeButton();
             if (clickingOnChargeButtonResult.IsFailed)
             {
                 return clickingOnChargeButtonResult;
             }
 
+            Result clickingOnCloseButtonResult = ClickingOnCloseButton();
+            if (clickingOnCloseButtonResult.IsFailed)
+            {
+                return clickingOnCloseButtonResult;
+            }
+
 
             Logger.Info($"The process of money aggregation has been successfully completed");
+            return Result.Ok(inputAnmountResult.Value);
+        }
+
+        private Result ClickingOnCloseButton()
+        {
+            Logger.FunctionStarted();
+            Task.Delay(1000);
+
+            ReadOnlyCollection<IWebElement>? closeCardButton = m_WebDriver?.FindElements(By.XPath(CloseButtonElement));
+            bool? isCloseCardButtonEnabled = closeCardButton?[0].Enabled;
+            if (!isCloseCardButtonEnabled.HasValue || !isCloseCardButtonEnabled.Value)
+            {
+                Logger.Error("The aggregation process failed because the ‘Charge Card’ button was disabled");
+                return Result.Fail("The aggregation process failed because the ‘Charge Card’ button was disabled");
+            }
+
+            closeCardButton?[0].Click();
+
+            Logger.FunctionFinished();
             return Result.Ok();
+        }
+
+        private Result<string> InputAnmount()
+        {
+            Logger.FunctionStarted();
+            Task.Delay(millisecondsDelay: 1000);
+
+            ReadOnlyCollection<IWebElement>? inputAmountElement = m_WebDriver?.FindElements(By.XPath(AmountElement));
+            if (inputAmountElement is null)
+            {
+                Logger.Error("Failed to retrieve the current input amount.");
+                return Result.Fail("Failed to retrieve the current input amount.");
+            }
+
+            string? inputAmount = inputAmountElement[0].Text;
+            if (string.IsNullOrWhiteSpace(inputAmount))
+            {
+                Logger.Error("Failed to retrieve the current input amount.");
+                return Result.Fail("Failed to retrieve the current input amount.");
+            }
+
+            Logger.FunctionFinished();
+            return Result.Ok(inputAmount);
         }
 
         private Result StartTenBisWebsite()
