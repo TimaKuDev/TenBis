@@ -18,12 +18,12 @@ namespace TenBis.Classes.Aggregators
         private const string CloseButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
         protected WebDriver? m_WebDriver;
 
-        private Result IsUserLoggedIn()
+        private async Task<Result> IsUserLoggedInAsync()
         {
             try
             {
                 Logger.FunctionStarted();
-                Task.Delay(2000);
+                await Task.Delay(2000);
 
                 int triesAmount = 0;
                 ReadOnlyCollection<IWebElement>? dropDownImage = m_WebDriver?.FindElements(By.XPath(DropDownImageElement));
@@ -47,10 +47,10 @@ namespace TenBis.Classes.Aggregators
             }
         }
 
-        private Result ClickingOnAggregateButton()
+        private async Task<Result> ClickingOnAggregateButtonAsync()
         {
             Logger.FunctionStarted();
-            Task.Delay(millisecondsDelay: 1000);
+            await Task.Delay(millisecondsDelay: 1000);
 
             ReadOnlyCollection<IWebElement>? aggregateButton = m_WebDriver?.FindElements(By.XPath(LoadCardButtonElement));
             bool? isAggregateButtonEnabled = aggregateButton?[0].Enabled;
@@ -66,10 +66,10 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        private Result ClickingOnContinueButton()
+        private async Task<Result> ClickingOnContinueButtonAsync()
         {
             Logger.FunctionStarted();
-            Task.Delay(millisecondsDelay: 1000);
+            await Task.Delay(millisecondsDelay: 1000);
 
             ReadOnlyCollection<IWebElement>? continueButton = m_WebDriver?.FindElements(By.XPath(ContinueButtonElement));
             bool? isContinueButtonEnabled = continueButton?[0].Enabled;
@@ -86,10 +86,10 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        private Result ClickingOnChargeButton()
+        private async Task<Result> ClickingOnChargeButtonAsync()
         {
             Logger.FunctionStarted();
-            Task.Delay(1000);
+            await Task.Delay(1000);
 
             ReadOnlyCollection<IWebElement>? chargeCardButton = m_WebDriver?.FindElements(By.XPath(ChargeCardButtonElement));
             bool? isChargeCardButtonEnabled = chargeCardButton?[0].Enabled;
@@ -116,10 +116,10 @@ namespace TenBis.Classes.Aggregators
                     return startTenBisWebsiteResult;
                 }
 
-                Result isUserLoggedInResult = IsUserLoggedIn();
-                if (isUserLoggedInResult.IsFailed)
+                Task<Result> isUserLoggedInTask = IsUserLoggedInAsync();
+                if (isUserLoggedInTask.Result.IsFailed)
                 {
-                    return isUserLoggedInResult;
+                    return isUserLoggedInTask.Result;
                 }
 
                 Result<string> aggregateMoneyToPointsResult = AggregateMoneyToPoints();
@@ -128,13 +128,13 @@ namespace TenBis.Classes.Aggregators
                     return aggregateMoneyToPointsResult;
                 }
 
-                Result<string> currentBalanceResult = GetCurrentBalance();
-                if (currentBalanceResult.IsFailed)
+                Task<Result<string>> currentBalanceTask = GetCurrentBalanceAsync();
+                if (currentBalanceTask.Result.IsFailed)
                 {
-                    return currentBalanceResult;
+                    return currentBalanceTask.Result;
                 }
 
-                string message = $"Aggregation completed successfully added: {aggregateMoneyToPointsResult.Value}, the current balance is: {currentBalanceResult.Value}";
+                string message = $"Aggregation completed successfully added: {aggregateMoneyToPointsResult.Value}, the current balance is: {currentBalanceTask.Result.Value}";
 
                 Logger.FunctionFinished();
                 return Result.Ok(message);
@@ -153,10 +153,10 @@ namespace TenBis.Classes.Aggregators
             }
         }
 
-        private Result<string> GetCurrentBalance()
+        private async Task<Result<string>> GetCurrentBalanceAsync()
         {
             Logger.FunctionStarted();
-            Task.Delay(1000);
+            await Task.Delay(1000);
 
             ReadOnlyCollection<IWebElement>? currentBalanceSpan = m_WebDriver?.FindElements(By.XPath(CurrentBalanceSpanElement));
             if (currentBalanceSpan is null)
@@ -181,45 +181,45 @@ namespace TenBis.Classes.Aggregators
             Logger.Info($"Initiating the process of money aggregation");
 
 
-            Result clickingOnAggregateButtonResult = ClickingOnAggregateButton();
-            if (clickingOnAggregateButtonResult.IsFailed)
+            Task<Result> clickingOnAggregateButtonTask = ClickingOnAggregateButtonAsync();
+            if (clickingOnAggregateButtonTask.Result.IsFailed)
             {
-                return clickingOnAggregateButtonResult;
+                return clickingOnAggregateButtonTask.Result;
             }
 
-            Result clickingOnContinueButtonResult = ClickingOnContinueButton();
-            if (clickingOnAggregateButtonResult.IsFailed)
+            Task<Result> clickingOnContinueButtonTask = ClickingOnContinueButtonAsync();
+            if (clickingOnContinueButtonTask.Result.IsFailed)
             {
-                return clickingOnContinueButtonResult;
+                return clickingOnContinueButtonTask.Result;
             }
 
-            Result<string> inputAnmountResult = InputAnmount();
-            if (inputAnmountResult.IsFailed)
+            Task<Result<string>> inputAnmountTask = InputAnmountAsync();
+            if (inputAnmountTask.Result.IsFailed)
             {
-                return inputAnmountResult;
+                return inputAnmountTask.Result;
             }
 
-            Result clickingOnChargeButtonResult = ClickingOnChargeButton();
-            if (clickingOnChargeButtonResult.IsFailed)
+            Task<Result> clickingOnChargeButtonTask = ClickingOnChargeButtonAsync();
+            if (clickingOnChargeButtonTask.Result.IsFailed)
             {
-                return clickingOnChargeButtonResult;
+                return clickingOnChargeButtonTask.Result;
             }
 
-            Result clickingOnCloseButtonResult = ClickingOnCloseButton();
-            if (clickingOnCloseButtonResult.IsFailed)
+            Task<Result> clickingOnCloseButtonTask = ClickingOnCloseButtonAsync();
+            if (clickingOnCloseButtonTask.Result.IsFailed)
             {
-                return clickingOnCloseButtonResult;
+                return clickingOnCloseButtonTask.Result;
             }
 
 
             Logger.Info($"The process of money aggregation has been successfully completed");
-            return Result.Ok(inputAnmountResult.Value);
+            return Result.Ok(inputAnmountTask.Result.Value);
         }
 
-        private Result ClickingOnCloseButton()
+        private async Task<Result> ClickingOnCloseButtonAsync()
         {
             Logger.FunctionStarted();
-            Task.Delay(1000);
+            await Task.Delay(1000);
 
             ReadOnlyCollection<IWebElement>? closeCardButton = m_WebDriver?.FindElements(By.XPath(CloseButtonElement));
             bool? isCloseCardButtonEnabled = closeCardButton?[0].Enabled;
@@ -235,10 +235,10 @@ namespace TenBis.Classes.Aggregators
             return Result.Ok();
         }
 
-        private Result<string> InputAnmount()
+        private async Task<Result<string>> InputAnmountAsync()
         {
             Logger.FunctionStarted();
-            Task.Delay(millisecondsDelay: 1000);
+            await Task.Delay(millisecondsDelay: 1000);
 
             ReadOnlyCollection<IWebElement>? inputAmountElement = m_WebDriver?.FindElements(By.XPath(AmountElement));
             if (inputAmountElement is null)
