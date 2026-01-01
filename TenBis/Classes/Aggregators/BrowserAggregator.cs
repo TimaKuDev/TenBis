@@ -10,12 +10,12 @@ namespace TenBis.Classes.Aggregators
         protected const string UserDataDirPrefix = "--user-data-dir=";
         protected const string TenBisUrl = "https://www.10bis.co.il/next/user-report?dateBias=0";
         private const string DropDownImageElement = @"//div[@class=""OpenMenuContent-dfTXpZ fHZBl""]";
-        private const string LoadCardButtonElement = @"//button[@class=""Button-dtEEMF AddCreditButton-bFDXtp iXOfjm zjGbl""]";
-        private const string AmountElement = @"//div[@class=""Amount-ebPevQ dCjGSF""]";
-        private const string ContinueButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
-        private const string ChargeCardButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
-        private const string CurrentBalanceSpanElement = @"//span[@class=""Balance-gcvUbW ewtkSs""]";
-        private const string CloseButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp iXOfjm hHtDlm""]";
+        private const string LoadCardButtonElement = @"//button[@class=""Button-dtEEMF StyledButton-dZZWzT jokJLE bGlRNZ AddCreditButton-bFDXtp goZVTN""]";
+        private const string AmountElement = @"//input[@class=""Input-jwGgFL lpqjDS""]";
+        private const string ContinueButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
+        private const string ChargeCardButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
+        private const string CurrentBalanceSpanElement = @"//span[@class=""Balance-XVyRl eMAnlL""]";
+        private const string CloseButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
         protected WebDriver? m_WebDriver;
 
         private async Task<Result> IsUserLoggedInAsync()
@@ -116,6 +116,12 @@ namespace TenBis.Classes.Aggregators
                     return startTenBisWebsiteResult;
                 }
 
+                Result closePopups = CloseAllIntercomPopups();
+                if (closePopups.IsFailed)
+                {
+                    return closePopups;
+                }
+
                 Task<Result> isUserLoggedInTask = IsUserLoggedInAsync();
                 if (isUserLoggedInTask.Result.IsFailed)
                 {
@@ -134,7 +140,7 @@ namespace TenBis.Classes.Aggregators
                     return currentBalanceTask.Result;
                 }
 
-                string message = $"Aggregation completed successfully added: {aggregateMoneyToPointsResult.Value}, the current balance is: {currentBalanceTask.Result.Value}";
+                string message = $"Aggregation completed successfully added: {aggregateMoneyToPointsResult.Value}₪, the current balance is: {currentBalanceTask.Result.Value}";
 
                 Logger.FunctionFinished();
                 return Result.Ok(message);
@@ -150,6 +156,51 @@ namespace TenBis.Classes.Aggregators
                 m_WebDriver?.Quit();
                 m_WebDriver?.Dispose();
                 Logger.Info("The browser has been closed and resources have been released.");
+            }
+        }
+
+        private Result CloseAllIntercomPopups()
+        {
+            By closeButtonSelector = By.CssSelector("span.intercom-post-close.intercom-rtl-14a6tgg.e1n022i42");
+            while (true)
+            {
+                // 1. Find all matching elements currently on the page
+                var closeButtons = m_WebDriver!.FindElements(closeButtonSelector);
+
+                // 2. If no buttons are found, break the loop
+                if (closeButtons.Count == 0)
+                {
+                    return Result.Ok();
+                }
+
+                try
+                {
+                    // 3. Click the first available button
+                    // We focus on index 0 because the list refreshes each loop
+                    if (closeButtons[0].Displayed && closeButtons[0].Enabled)
+                    {
+                        closeButtons[0].Click();
+
+                        // 4. Short wait to allow the UI to update/animate
+                        Thread.Sleep(500);
+                    }
+                    else
+                    {
+                        // If it's found but not visible/clickable, we stop to avoid infinite loops
+                        return Result.Ok();
+                    }
+                }
+                catch (StaleElementReferenceException)
+                {
+                    // If the page changed while clicking, just retry the loop
+                    continue;
+                }
+                catch (ElementClickInterceptedException elementClickInterceptedException)
+                {
+                    // If something is blocking the click, you might need an 
+                    // IJavaScriptExecutor click or to wait longer
+                    return Result.Fail(elementClickInterceptedException.Message);
+                }
             }
         }
 
@@ -187,16 +238,16 @@ namespace TenBis.Classes.Aggregators
                 return clickingOnAggregateButtonTask.Result;
             }
 
-            Task<Result> clickingOnContinueButtonTask = ClickingOnContinueButtonAsync();
-            if (clickingOnContinueButtonTask.Result.IsFailed)
-            {
-                return clickingOnContinueButtonTask.Result;
-            }
-
             Task<Result<string>> inputAnmountTask = InputAnmountAsync();
             if (inputAnmountTask.Result.IsFailed)
             {
                 return inputAnmountTask.Result;
+            }
+
+            Task<Result> clickingOnContinueButtonTask = ClickingOnContinueButtonAsync();
+            if (clickingOnContinueButtonTask.Result.IsFailed)
+            {
+                return clickingOnContinueButtonTask.Result;
             }
 
             Task<Result> clickingOnChargeButtonTask = ClickingOnChargeButtonAsync();
@@ -219,7 +270,7 @@ namespace TenBis.Classes.Aggregators
         private async Task<Result> ClickingOnCloseButtonAsync()
         {
             Logger.FunctionStarted();
-            await Task.Delay(1000);
+            await Task.Delay(5000);
 
             ReadOnlyCollection<IWebElement>? closeCardButton = m_WebDriver?.FindElements(By.XPath(CloseButtonElement));
             bool? isCloseCardButtonEnabled = closeCardButton?[0].Enabled;
@@ -247,7 +298,7 @@ namespace TenBis.Classes.Aggregators
                 return Result.Fail("Failed to retrieve the current input amount.");
             }
 
-            string? inputAmount = inputAmountElement[0].Text;
+            string? inputAmount = inputAmountElement[0].GetAttribute(attributeName: "value");
             if (string.IsNullOrWhiteSpace(inputAmount))
             {
                 Logger.Error("Failed to retrieve the current input amount.");
