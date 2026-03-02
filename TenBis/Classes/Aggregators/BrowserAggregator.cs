@@ -161,47 +161,71 @@ namespace TenBis.Classes.Aggregators
 
         private Result CloseAllIntercomPopups()
         {
-            By closeButtonSelector = By.CssSelector("span.intercom-post-close.intercom-rtl-14a6tgg.e1n022i42");
-            while (true)
+            List<(string frame, string span)> closingElements =
+                [
+                ("intercom-modal-frame", "span.intercom-post-close.intercom-rtl-14a6tgg.e1n022i42")
+                ];
+
+
+            foreach ((string frame, string span) in closingElements)
             {
-                // 1. Find all matching elements currently on the page
-                var closeButtons = m_WebDriver!.FindElements(closeButtonSelector);
-
-                // 2. If no buttons are found, break the loop
-                if (closeButtons.Count == 0)
+                while (true)
                 {
-                    return Result.Ok();
-                }
-
-                try
-                {
-                    // 3. Click the first available button
-                    // We focus on index 0 because the list refreshes each loop
-                    if (closeButtons[0].Displayed && closeButtons[0].Enabled)
+                    bool intercomFrameExists = m_WebDriver!.FindElements(By.Name(frame)).Count != 0;
+                    if (!intercomFrameExists)
                     {
-                        closeButtons[0].Click();
-
-                        // 4. Short wait to allow the UI to update/animate
-                        Thread.Sleep(500);
+                        break;
                     }
-                    else
+
+                    m_WebDriver!.SwitchTo().Frame(frame);
+
+                    // 1. Find all matching elements currently on the page
+                    By closeButtonSelector = By.CssSelector(span);
+                    ReadOnlyCollection<IWebElement> closeButtons = m_WebDriver!.FindElements(closeButtonSelector);
+
+                    // 2. If no buttons are found, break the loop
+                    if (closeButtons.Count == 0)
                     {
-                        // If it's found but not visible/clickable, we stop to avoid infinite loops
                         return Result.Ok();
                     }
-                }
-                catch (StaleElementReferenceException)
-                {
-                    // If the page changed while clicking, just retry the loop
-                    continue;
-                }
-                catch (ElementClickInterceptedException elementClickInterceptedException)
-                {
-                    // If something is blocking the click, you might need an 
-                    // IJavaScriptExecutor click or to wait longer
-                    return Result.Fail(elementClickInterceptedException.Message);
+
+                    try
+                    {
+                        // 3. Click the first available button
+                        // We focus on index 0 because the list refreshes each loop
+                        if (closeButtons[0].Displayed && closeButtons[0].Enabled)
+                        {
+                            closeButtons[0].Click();
+
+                            // 4. Short wait to allow the UI to update/animate
+                            Thread.Sleep(500);
+                        }
+                        else
+                        {
+                            // If it's found but not visible/clickable, we stop to avoid infinite loops
+                            return Result.Ok();
+                        }
+                    }
+                    catch (StaleElementReferenceException)
+                    {
+                        // If the page changed while clicking, just retry the loop
+                        continue;
+                    }
+                    catch (ElementClickInterceptedException elementClickInterceptedException)
+                    {
+                        // If something is blocking the click, you might need an 
+                        // IJavaScriptExecutor click or to wait longer
+                        return Result.Fail(elementClickInterceptedException.Message);
+                    }
+                    finally
+                    {
+                        // Always switch back to the main content after interacting with a frame
+                        m_WebDriver!.SwitchTo().DefaultContent();
+                    }
                 }
             }
+
+            return Result.Ok();
         }
 
         private async Task<Result<string>> GetCurrentBalanceAsync()
