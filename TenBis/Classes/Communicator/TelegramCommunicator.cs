@@ -20,10 +20,7 @@ namespace TenBis.Classes.Communicator
         {
             Logger.FunctionStarted();
 
-            if (telegramSettings is null)
-            {
-                throw new ArgumentNullException(nameof(telegramSettings));
-            }
+            ArgumentNullException.ThrowIfNull(telegramSettings);
 
             if (!telegramSettings.ChatId.HasValue)
             {
@@ -35,20 +32,10 @@ namespace TenBis.Classes.Communicator
                 throw new ArgumentNullException(nameof(telegramSettings));
             }
 
-            if (validationMessageConfig is null)
-            {
-                throw new ArgumentNullException(nameof(validationMessageConfig));
-            }
+            ArgumentNullException.ThrowIfNull(validationMessageConfig);
+            ArgumentNullException.ThrowIfNull(validationMessageConfig.ResendIntervalMinutes);
+            ArgumentNullException.ThrowIfNull(validationMessageConfig.ResponseTimeoutMinutes);
 
-            if (validationMessageConfig.ResendIntervalMinutes is null)
-            {
-                throw new ArgumentNullException(nameof(validationMessageConfig));
-            }
-
-            if (validationMessageConfig.ResponseTimeoutMinutes is null)
-            {
-                throw new ArgumentNullException(nameof(validationMessageConfig));
-            }
 
             m_ChatId = telegramSettings.ChatId.Value;
             m_ValidationMessageConfig = validationMessageConfig;
@@ -121,14 +108,13 @@ namespace TenBis.Classes.Communicator
 
                 m_UserResponseTcs = new TaskCompletionSource<bool>();
 
-                InlineKeyboardMarkup replyMarkup = new(new[]
-                {
-                    new[]
-                    {
+                InlineKeyboardMarkup replyMarkup = new(
+                [
+                    [
                         InlineKeyboardButton.WithCallbackData("Yes", bool.TrueString),
                         InlineKeyboardButton.WithCallbackData("No", bool.FalseString)
-                    }
-                });
+                    ]
+                ]);
 
                 cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(m_ValidationMessageConfig!.ResponseTimeoutMinutes!.Value));
                 CancellationToken cancellationToken = cancellationTokenSource.Token;
@@ -139,7 +125,7 @@ namespace TenBis.Classes.Communicator
                     errorHandler: (client, exception, token) => HandleErrorAsync(client, exception, token),
                     receiverOptions: new ReceiverOptions
                     {
-                        AllowedUpdates = new[] { UpdateType.CallbackQuery }
+                        AllowedUpdates = [UpdateType.CallbackQuery]
                     },
                     cancellationToken: cancellationToken
                 );
