@@ -10,7 +10,7 @@ namespace TenBis.Classes.Aggregators
         protected const string UserDataDirPrefix = "--user-data-dir=";
         protected const string TenBisUrl = "https://www.10bis.co.il/next/user-report?dateBias=0";
         private const string DropDownImageElement = @"//div[@class=""OpenMenuContent-dfTXpZ fHZBl""]";
-        private const string LoadCardButtonElement = @"//button[@class=""Button-dtEEMF StyledButton-dZZWzT jokJLE bGlRNZ AddCreditButton-bFDXtp goZVTN""]";
+        private const string LoadCardButtonElement = "//button[contains(@class,'AddCreditButton-bFDXtp') and contains(.,'הטענת')]";
         private const string AmountElement = @"//input[@class=""Input-jwGgFL lpqjDS""]";
         private const string ContinueButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
         private const string ChargeCardButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
@@ -51,16 +51,15 @@ namespace TenBis.Classes.Aggregators
         {
             Logger.FunctionStarted();
             await Task.Delay(millisecondsDelay: 1000);
-
-            ReadOnlyCollection<IWebElement>? aggregateButton = m_WebDriver?.FindElements(By.XPath(LoadCardButtonElement));
-            bool? isAggregateButtonEnabled = aggregateButton?[0].Enabled;
+            IWebElement? aggregateButton = m_WebDriver?.FindElement(By.XPath(LoadCardButtonElement));
+            bool? isAggregateButtonEnabled = aggregateButton?.Enabled;
             if (!isAggregateButtonEnabled.HasValue || !isAggregateButtonEnabled.Value)
             {
                 Logger.Error("The aggregation process failed because the ‘Load Card’ button was disabled");
                 return Result.Fail("The aggregation process failed because the ‘Load Card’ button was disabled");
             }
 
-            aggregateButton?[0].Click();
+            aggregateButton?.Click();
 
             Logger.FunctionFinished();
             return Result.Ok();
@@ -71,8 +70,8 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionStarted();
             await Task.Delay(millisecondsDelay: 1000);
 
-            ReadOnlyCollection<IWebElement>? continueButton = m_WebDriver?.FindElements(By.XPath(ContinueButtonElement));
-            bool? isContinueButtonEnabled = continueButton?[0].Enabled;
+            IWebElement? continueButton = m_WebDriver?.FindElement(By.XPath(ContinueButtonElement));
+            bool? isContinueButtonEnabled = continueButton?.Enabled;
             if (!isContinueButtonEnabled.HasValue || !isContinueButtonEnabled.Value)
             {
                 Logger.Error("The aggregation process failed because the ‘Continue’ button was disabled");
@@ -80,7 +79,7 @@ namespace TenBis.Classes.Aggregators
             }
 
 
-            continueButton?[0].Click();
+            continueButton?.Click();
 
             Logger.FunctionFinished();
             return Result.Ok();
@@ -91,15 +90,15 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionStarted();
             await Task.Delay(1000);
 
-            ReadOnlyCollection<IWebElement>? chargeCardButton = m_WebDriver?.FindElements(By.XPath(ChargeCardButtonElement));
-            bool? isChargeCardButtonEnabled = chargeCardButton?[0].Enabled;
+            IWebElement? chargeCardButton = m_WebDriver?.FindElement(By.XPath(ChargeCardButtonElement));
+            bool? isChargeCardButtonEnabled = chargeCardButton?.Enabled;
             if (!isChargeCardButtonEnabled.HasValue || !isChargeCardButtonEnabled.Value)
             {
                 Logger.Error("The aggregation process failed because the ‘Charge Card’ button was disabled");
                 return Result.Fail("The aggregation process failed because the ‘Charge Card’ button was disabled");
             }
-
-            chargeCardButton?[0].Click();
+                
+            chargeCardButton?.Click();
 
             Logger.FunctionFinished();
             return Result.Ok();
@@ -233,14 +232,14 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionStarted();
             await Task.Delay(1000);
 
-            ReadOnlyCollection<IWebElement>? currentBalanceSpan = m_WebDriver?.FindElements(By.XPath(CurrentBalanceSpanElement));
+            IWebElement? currentBalanceSpan = m_WebDriver?.FindElement(By.XPath(CurrentBalanceSpanElement));
             if (currentBalanceSpan is null)
             {
                 Logger.Error("Failed to retrieve the current balance span.");
                 return Result.Fail("Failed to retrieve the current balance span.");
             }
 
-            string? currentBalance = currentBalanceSpan[0].Text;
+            string? currentBalance = currentBalanceSpan.Text;
             if (string.IsNullOrWhiteSpace(currentBalance))
             {
                 Logger.Error("Failed to retrieve the current balance.");
@@ -296,15 +295,15 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionStarted();
             await Task.Delay(5000);
 
-            ReadOnlyCollection<IWebElement>? closeCardButton = m_WebDriver?.FindElements(By.XPath(CloseButtonElement));
-            bool? isCloseCardButtonEnabled = closeCardButton?[0].Enabled;
+            IWebElement? closeCardButton = m_WebDriver?.FindElement(By.XPath(CloseButtonElement));
+            bool? isCloseCardButtonEnabled = closeCardButton?.Enabled;
             if (!isCloseCardButtonEnabled.HasValue || !isCloseCardButtonEnabled.Value)
             {
                 Logger.Error("The aggregation process failed because the ‘Charge Card’ button was disabled");
                 return Result.Fail("The aggregation process failed because the ‘Charge Card’ button was disabled");
             }
 
-            closeCardButton?[0].Click();
+            closeCardButton?.Click();
 
             Logger.FunctionFinished();
             return Result.Ok();
@@ -315,14 +314,14 @@ namespace TenBis.Classes.Aggregators
             Logger.FunctionStarted();
             await Task.Delay(millisecondsDelay: 1000);
 
-            ReadOnlyCollection<IWebElement>? inputAmountElement = m_WebDriver?.FindElements(By.XPath(AmountElement));
+            IWebElement? inputAmountElement = m_WebDriver?.FindElement(By.XPath(AmountElement));
             if (inputAmountElement is null)
             {
                 Logger.Error("Failed to retrieve the current input amount.");
                 return Result.Fail("Failed to retrieve the current input amount.");
             }
 
-            string? inputAmount = inputAmountElement[0].GetAttribute(attributeName: "value");
+            string? inputAmount = inputAmountElement.GetAttribute(attributeName: "value");
             if (string.IsNullOrWhiteSpace(inputAmount))
             {
                 Logger.Error("Failed to retrieve the current input amount.");

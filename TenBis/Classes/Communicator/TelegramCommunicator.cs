@@ -70,7 +70,6 @@ namespace TenBis.Classes.Communicator
                 m_UserResponseTcs?.TrySetResult(response);
 
                 await botClient.AnswerCallbackQuery(update.CallbackQuery.Id, cancellationToken: cancellationToken);
-                //await botClient.SendMessage(m_ChatId, $"You selected: {(response ? "Yes" : "No")}", cancellationToken: cancellationToken);
             }
         }
 
