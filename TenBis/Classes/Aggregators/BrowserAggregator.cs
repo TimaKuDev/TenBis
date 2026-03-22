@@ -11,11 +11,10 @@ namespace TenBis.Classes.Aggregators
         protected const string TenBisUrl = "https://www.10bis.co.il/next/user-report?dateBias=0";
         private const string DropDownImageElement = @"//div[@class=""OpenMenuContent-dfTXpZ fHZBl""]";
         private const string LoadCardButtonElement = "//button[contains(@class,'AddCreditButton-bFDXtp') and contains(.,'הטענת')]";
-        private const string AmountElement = @"//input[@class=""Input-jwGgFL lpqjDS""]";
-        private const string ContinueButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
-        private const string ChargeCardButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
+        private const string AmountElement = @"//div[.//div[contains(text(),'₪')]]//input[@type='text']";
+        private const string ContinueButtonElement = @"//button[normalize-space()='המשך']";
+        private const string ChargeCardButtonElement = @"//button[contains(@class,'SubmitButton-') and normalize-space()='הטענת קרדיט']";
         private const string CurrentBalanceSpanElement = @"//span[@class=""Balance-XVyRl eMAnlL""]";
-        private const string CloseButtonElement = @"//button[@class=""Button-dtEEMF SubmitButton-etwBPp cxQnNW hHtDlm""]";
         protected WebDriver? m_WebDriver;
 
         private async Task<Result> IsUserLoggedInAsync()
@@ -160,67 +159,43 @@ namespace TenBis.Classes.Aggregators
 
         private Result CloseAllIntercomPopups()
         {
-            List<(string frame, string span)> closingElements =
-                [
-                ("intercom-modal-frame", "span.intercom-post-close.intercom-rtl-14a6tgg.e1n022i42")
-                ];
+            const string PopupContainer = "[class*='PopupModalBase-']";
+            const string CloseButton = "[data-test-id='modalCloseButton']";
 
-
-            foreach ((string frame, string span) in closingElements)
+            while (true)
             {
-                while (true)
+                bool popupExists = m_WebDriver!.FindElements(By.CssSelector(PopupContainer)).Count != 0;
+                if (!popupExists)
                 {
-                    bool intercomFrameExists = m_WebDriver!.FindElements(By.Name(frame)).Count != 0;
-                    if (!intercomFrameExists)
+                    break;
+                }
+
+                try
+                {
+                    IWebElement closeButton = m_WebDriver!.FindElement(By.CssSelector(CloseButton));
+
+                    if (closeButton.Displayed && closeButton.Enabled)
+                    {
+                        closeButton.Click();
+                        Thread.Sleep(500);
+                    }
+                    else
                     {
                         break;
                     }
-
-                    m_WebDriver!.SwitchTo().Frame(frame);
-
-                    // 1. Find all matching elements currently on the page
-                    By closeButtonSelector = By.CssSelector(span);
-                    ReadOnlyCollection<IWebElement> closeButtons = m_WebDriver!.FindElements(closeButtonSelector);
-
-                    // 2. If no buttons are found, break the loop
-                    if (closeButtons.Count == 0)
-                    {
-                        return Result.Ok();
-                    }
-
-                    try
-                    {
-                        // 3. Click the first available button
-                        // We focus on index 0 because the list refreshes each loop
-                        if (closeButtons[0].Displayed && closeButtons[0].Enabled)
-                        {
-                            closeButtons[0].Click();
-
-                            // 4. Short wait to allow the UI to update/animate
-                            Thread.Sleep(500);
-                        }
-                        else
-                        {
-                            // If it's found but not visible/clickable, we stop to avoid infinite loops
-                            return Result.Ok();
-                        }
-                    }
-                    catch (StaleElementReferenceException)
-                    {
-                        // If the page changed while clicking, just retry the loop
-                        continue;
-                    }
-                    catch (ElementClickInterceptedException elementClickInterceptedException)
-                    {
-                        // If something is blocking the click, you might need an 
-                        // IJavaScriptExecutor click or to wait longer
-                        return Result.Fail(elementClickInterceptedException.Message);
-                    }
-                    finally
-                    {
-                        // Always switch back to the main content after interacting with a frame
-                        m_WebDriver!.SwitchTo().DefaultContent();
-                    }
+                }
+                catch (NoSuchElementException)
+                {
+                    // No close button found, no popup to close
+                    break;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    continue;
+                }
+                catch (ElementClickInterceptedException ex)
+                {
+                    return Result.Fail(ex.Message);
                 }
             }
 
@@ -279,35 +254,10 @@ namespace TenBis.Classes.Aggregators
                 return clickingOnChargeButtonTask.Result;
             }
 
-            Task<Result> clickingOnCloseButtonTask = ClickingOnCloseButtonAsync();
-            if (clickingOnCloseButtonTask.Result.IsFailed)
-            {
-                return clickingOnCloseButtonTask.Result;
-            }
-
-
             Logger.Info($"The process of money aggregation has been successfully completed");
             return Result.Ok(inputAnmountTask.Result.Value);
         }
 
-        private async Task<Result> ClickingOnCloseButtonAsync()
-        {
-            Logger.FunctionStarted();
-            await Task.Delay(5000);
-
-            IWebElement? closeCardButton = m_WebDriver?.FindElement(By.XPath(CloseButtonElement));
-            bool? isCloseCardButtonEnabled = closeCardButton?.Enabled;
-            if (!isCloseCardButtonEnabled.HasValue || !isCloseCardButtonEnabled.Value)
-            {
-                Logger.Error("The aggregation process failed because the ‘Charge Card’ button was disabled");
-                return Result.Fail("The aggregation process failed because the ‘Charge Card’ button was disabled");
-            }
-
-            closeCardButton?.Click();
-
-            Logger.FunctionFinished();
-            return Result.Ok();
-        }
 
         private async Task<Result<string>> InputAnmountAsync()
         {
