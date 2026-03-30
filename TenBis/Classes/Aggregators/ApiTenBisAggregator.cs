@@ -18,15 +18,15 @@ namespace TenBis.Classes.Aggregators
             }
             if (string.IsNullOrWhiteSpace(api.BaseUrl))
             {
-                throw new ArgumentException("BaseUrl cannot be null or empty.", nameof(api.BaseUrl));
+                throw new ArgumentException("BaseUrl cannot be null or empty.");
             }
             if (string.IsNullOrWhiteSpace(api.Cookie))
             {
-                throw new ArgumentException("Cookie cannot be null or empty.", nameof(api.Cookie));
+                throw new ArgumentException("Cookie cannot be null or empty.");
             }
             if (!api.TimeoutSeconds.HasValue)
             {
-                throw new ArgumentException("TimeoutSeconds must have a value.", nameof(api.TimeoutSeconds));
+                throw new ArgumentException("TimeoutSeconds must have a value.");
             }
 
             m_Api = api;
